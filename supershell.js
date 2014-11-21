@@ -3,13 +3,33 @@ load("sbbsdefs.js");
 load("frame-mgmt.js");
 load("event-timer.js");
 load("superhelpers.js");
+load("ssmenu.js");
+load("json-client.js");
+load("json-chat.js");
 
+load(system.mods_dir + "coa/coa-client.js");
 //globals
+var the_loop;
 var contextNum = 0; //starting context
 var timer = new Timer();
 var event1 = timer.addEvent(2000,true,eventOne);
 var nodeListtimer = timer.addEvent(10000,true,showLocalNodes)
 eventDebugCounter = 0;
+var chat_options = load("modopts.js","jsonchat");
+var chat_client = new JSONClient("127.0.1.1",10088);
+var chat = new JSONChat(user.number,chat_client);
+chat.join("#main");
+
+function chatCycle(){
+		chat.cycle();
+		var chan = chat.channels[channel.toUpperCase()];
+		while(chan.messages.length > 0) {
+			submitMessage(chatOutputFrame,chan.messages.shift());
+		}
+		cycleAll();
+}
+
+
 //var rssTickerString = rssFeed();
 
 var contexts = [
@@ -38,7 +58,6 @@ mainFrameInit();
 showLocalNodes();
 
 function mainLoop(){
-	var the_loop;
 	//showLocalNodes();
 	contextSwitch(1);
 	//testA();
@@ -69,12 +88,16 @@ function timerCheck(){
 }
 mainLoop();
 
+
+
+
+
 function eventOne(){
+	chatCycle();
 	eventDebugCounter++;
 	headerFrame.putmsg("\1g..\1w" + eventDebugCounter * 2);
 	cycleAll();
 }
-
 
 
 
@@ -120,7 +143,7 @@ function chatInput(){
 			return;
 		}	
 		if(chatKey == "\r" || chatKey == "\n"){
-				submitChatMessage(chatMessage);
+				chat.submit(channels[channel_index],chatMessage);
 				chatMessage = "";
 		} else if(chatKey == "\b" && chatMessage.length > 0) { //handle delete
 			chatMessage = chatMessage.substring(0,chatMessage.length - 1);
@@ -143,34 +166,16 @@ function submitChatMessage(messageString){
 }
 function menuControl(){
 	bbs.node_action = 0;
-		//expand the frame
-		/*
-		menuFrame.checkbounds = false;
-		menuFrame.width = menuFrame.width * 2;  //shift frames right resize A
-		menuFrame.close();
-		menuFrame.cycle();
-		menuFrame.open();
-		menuFrame.checkbounds = true;
-		menuFrame.cycle();
-		menuFrame.putmsg("menu control function operating");
-		*/  
-		/*if(console.getkey() != undefined)
-		{
-			/*menuFrame.invalidate();
-			//menuFrame.checkbounds = false;
-			menuFrame.width = menuFrame.width/2;
-			menuFrame.close();
-
-			menuFrame.cycle();
-			chatOutputFrame.top();
-			menuFrame.bottom();
-			bodyFrame.bottom();
-			menuFrame.open();
-			menuFrame.checkbounds = true;
-			menuFrame.refresh();
-			menuFrame.cycle();
-			*/
-			return;
+	tree.open();
+	cycleAll();
+	var k;
+	while(k != "\t"){
+		k = console.inkey();
+		tree.getcmd(k);
+		tree.cycle();
+	}
+	contextSwitch(contextNum + 1);
+	return;
 		//}
 
 }
@@ -187,15 +192,3 @@ function preRoll(){
 
 
 
-function testA(){
-	for(i = 0; i < contexts.length; i++){
-		obj = contexts[i];
-		bodyFrame.putmsg(obj.desc + "\r\n");
-	}
-bodyFrame.cycle();
-}
-
-function testB(){
-	bodyFrame.putmsg(contextNum) + " + " ;
-	bodyFrame.cycle();
-}
