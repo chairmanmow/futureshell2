@@ -2,12 +2,15 @@
 load("sbbsdefs.js");
 load("frame-mgmt.js");
 load("event-timer.js");
+load("superhelpers.js");
 
 //globals
 var contextNum = 0; //starting context
 var timer = new Timer();
-var event1 = timer.addEvent(2000,true,eventOne)
+var event1 = timer.addEvent(2000,true,eventOne);
+var nodeListtimer = timer.addEvent(10000,true,showLocalNodes)
 eventDebugCounter = 0;
+//var rssTickerString = rssFeed();
 
 var contexts = [
 	{func_name:"chatInput",desc:"blah chat",
@@ -23,14 +26,21 @@ var contexts = [
 		}}];
 var contextNumStop = contexts.length; //ghetto array pointers
 var context = contexts[contextNum];
+
+
+
+
+
+
 preRoll();
 mainFrameInit();
-
-
+//headerFrame.putmsg(rssTickerString);
+showLocalNodes();
 
 function mainLoop(){
 	var the_loop;
-	contextSwitch(0);
+	//showLocalNodes();
+	contextSwitch(1);
 	//testA();
 	while(the_loop = true){
 
@@ -46,54 +56,91 @@ function mainLoop(){
 		} else {
 		//testB();
 		}//detectTermSizeChange();	}
-		while(timer.events.length > 0) {
-			timer.cycle();
-			break;
-		}
+		timerCheck();
 	}
 }
 
+
+function timerCheck(){
+			while(timer.events.length > 0) {
+			timer.cycle();
+			break;
+		}
+}
 mainLoop();
 
 function eventOne(){
-	showLocalNodes();
 	eventDebugCounter++;
 	headerFrame.putmsg("\1g..\1w" + eventDebugCounter * 2);
-	headerFrame.cycle();
+	cycleAll();
 }
+
 
 
 
 function contextSwitch(contextNumber){  //adds the number values -1.0.1 are good
 contextNum = contextNumber;
-if(contextNum > contexts.length){
-	contextNum = 0;
-}
+	if(contextNum == contexts.length){
+		contextNum = 0;
+	}
 	switch (contextNum){
 		case 0 :
 		updateContext(contextNum); //chat
-		return;
+		break;
 		case 1 :
 		updateContext(contextNum); //menu
-		return;
+		break;
 		case 2 :
 		updateContext(contextNum); //menu
+		break;
+		default:
 		return;
+	}
 }
 
-}
 function updateContext(contextIndex){
 	var obj = contexts[contextIndex];
-	obj.func();
+
 	footerAFrame.clear();
 	footerAFrame.center(obj.desc);
 	footerAFrame.cycle();
+	obj.func();
 	
 }
 function chatInput(){
 	bbs.node_action = 17;
+	var chatKey;
+	var chatMessage = "";
+	while(chatKey != '\t') { 
+		timerCheck();
+		chatKey = console.inkey();	
+		if(chatKey == "\t"){
+			footerBFrame.clear();
+			contextSwitch(contextNum + 1);
+			return;
+		}	
+		if(chatKey == "\r" || chatKey == "\n"){
+				submitChatMessage(chatMessage);
+				chatMessage = "";
+		} else if(chatKey == "\b" && chatMessage.length > 0) { //handle delete
+			chatMessage = chatMessage.substring(0,chatMessage.length - 1);
+			footerBFrame.putmsg(chatKey);
+			footerBFrame.cycle();
+		} else {
+			chatMessage += chatKey;
+			footerBFrame.putmsg(chatKey);
+			footerBFrame.cycle();
+		}				
+	}  //end while
+	footerBFrame.clear();
+	footerBFrame.cycle();
 }
 
+function submitChatMessage(messageString){
+	chatOutputFrame.putmsg(messageString);
+	footerBFrame.clear();
+	chatOutputFrame.cycle();
+}
 function menuControl(){
 	bbs.node_action = 0;
 		//expand the frame
@@ -107,7 +154,7 @@ function menuControl(){
 		menuFrame.cycle();
 		menuFrame.putmsg("menu control function operating");
 		*/  
-		if(console.getkey() != undefined)
+		/*if(console.getkey() != undefined)
 		{
 			/*menuFrame.invalidate();
 			//menuFrame.checkbounds = false;
@@ -124,11 +171,13 @@ function menuControl(){
 			menuFrame.cycle();
 			*/
 			return;
-		}
+		//}
+
 }
 
 function messages(){  //let's make this function convert the message listing to trees and use anohter frame (pop up to display messages)
 	bbs.node_action = 1;
+	return;
 }
 
 function preRoll(){
