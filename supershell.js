@@ -7,6 +7,7 @@ load("ssmenu.js");
 load("json-client.js");
 load("json-chat.js");
 load("ssmsg.js");
+load("megarss.js");
 
 
 load(system.mods_dir + "coa/coa-client.js");
@@ -23,6 +24,8 @@ chat.join("#main");
 var channels = [];
 var channels_map = [];
 var channel_index = 0;
+var rssTickerCounter = 0;
+var theTickerString = rssString();
 
 function chatCycle(){
 	for(var c in chat.channels) {
@@ -136,9 +139,18 @@ mainLoop();
 
 
 function eventOne(){
+	if(rssTickerCounter > theTickerString.length){
+		rssLoopIndex++;
+		headerFrame.clear();
+		cycleAll();
+		theTickerString = rssString();
+		rssString();
+	}
+	bodyFrame.putmsg(theTickerString.length + "|" + rssTickerCounter + "|");  //debuggers
 	chatCycle();
 	eventDebugCounter++;
-	headerFrame.putmsg("\1g..\1w" + eventDebugCounter * 2);
+	rssTickerCounter++;
+	headerFrame.scroll(0,1);
 	cycleAll();
 }
 
@@ -163,9 +175,11 @@ contextNum = contextNumber;
 	}
 }
 
-function updateContext(contextIndex){
-	var obj = contexts[contextIndex];
 
+
+function updateContext(contextIndex){
+	
+	var obj = contexts[contextIndex];
 	footerAFrame.clear();
 	footerBFrame.clear();
 	footerAFrame.center(obj.desc);
