@@ -25,7 +25,7 @@ Low priority - easy fix?
 Nuisance/bug - After approximately 8 hours on the board loitering, memory will run out and kick the user.  My theory is it has to do with how the RSS ticker allocates memory growing and growing.  Not a shock given when I wrote it.  
 
 *** PLANNED UPGRADES ***
-THEME COLOR SWAPPING VIA JSON OBJECTS - straight forward enough - BORDER OPTIONS / tricky for me.
+THEME COLOR SWAPPING VIA JSON OBJECTS - straight forward enough - BORDER OPTIONS (update (I've decided for the most part borders take up too much space.  will see)
 
 BBS NOTIFICATION FRAME- Replace lower left frame with a bbs action frame that displays what people are doing on the BBS, this will probably be accompanied by a change to a way things are launched by creating an object prototype that perhaps sends its own kind of JSON messages to be interpreted by the frame.
 --- update --- this has been done
