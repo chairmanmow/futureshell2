@@ -6,6 +6,8 @@ load("superhelpers.js");
 load("ssmenu.js");
 load("json-client.js");
 load("json-chat.js");
+load("ssmsg.js");
+
 
 load(system.mods_dir + "coa/coa-client.js");
 //globals
@@ -15,18 +17,25 @@ var timer = new Timer();
 var event1 = timer.addEvent(2000,true,eventOne);
 var nodeListtimer = timer.addEvent(10000,true,showLocalNodes)
 eventDebugCounter = 0;
-var chat_options = load("modopts.js","jsonchat");
-var chat_client = new JSONClient("127.0.1.1",10088);
-var chat = new JSONChat(user.number,chat_client);
+var localJSONclient = new JSONClient("127.0.1.1",10088);
+var chat = new JSONChat(user.number,localJSONclient);
 chat.join("#main");
+var channels = [];
+var channels_map = [];
+var channel_index = 0;
 
 function chatCycle(){
+	for(var c in chat.channels) {
 		chat.cycle();
-		var chan = chat.channels[channel.toUpperCase()];
+		var chan = chat.channels[c];
+		verifyLocalCache(chan); // verify this channels presence in the local cache */				
+			/* display any new messages */
 		while(chan.messages.length > 0) {
-			submitMessage(chatOutputFrame,chan.messages.shift());
+			chatOutputFrame.putmsg(printMessage(chan,chan.messages.shift()));
 		}
+		updateLocalCache();	
 		cycleAll();
+	}
 }
 
 
@@ -35,15 +44,46 @@ function chatCycle(){
 var contexts = [
 	{func_name:"chatInput",desc:"blah chat",
 	func: function(){
+		
 		chatInput();
 	}},
 	{func_name:"menuControl",desc:"blah menu",func: function(){
 		menuControl();
 	}},
-	{func_name:"messages",desc:"blah messages",
+	{func_name:"message_lister",desc:"blah messages",
 	func: function(){
-			messages();
+		footerBFrame.clear();
+		footerBFrame.putmsg("\1h\1wLeft/Right Arrows = Switch Areas, Up/Down = Browse Messages");
+		mbcode = bbs.cursub_code;  // get the current code
+			cycleAll();
+			bbs.node_action = 1;
+
+			cycleAll();
+			var a_key;
+			a_key = console.inkey();
+
+			while(a_key != "\t"){
+				a_key = console.inkey();
+				if(a_key == KEY_RIGHT){
+					msgSwitch = "nextSub";
+					switchMsgAreas();
+				}
+				if(a_key == KEY_LEFT) {
+					msgSwitch = "prevSub";
+					switchMsgAreas();
+				}
+				if(a_key == "\t"){
+					contextSwitch(contextNum + 1);
+					return;
+				}
+				if(a_key == KEY_UP || a_key == KEY_DOWN){
+					msgList.interact();
+				}
+				cycleAll();
+			}
+		
 		}}];
+
 var contextNumStop = contexts.length; //ghetto array pointers
 var context = contexts[contextNum];
 
@@ -56,6 +96,9 @@ preRoll();
 mainFrameInit();
 //headerFrame.putmsg(rssTickerString);
 showLocalNodes();
+msgList.display();
+eventOne();
+cycleAll();
 
 function mainLoop(){
 	//showLocalNodes();
@@ -115,7 +158,6 @@ contextNum = contextNumber;
 		break;
 		case 2 :
 		updateContext(contextNum); //menu
-		break;
 		default:
 		return;
 	}
@@ -125,25 +167,31 @@ function updateContext(contextIndex){
 	var obj = contexts[contextIndex];
 
 	footerAFrame.clear();
+	footerBFrame.clear();
 	footerAFrame.center(obj.desc);
-	footerAFrame.cycle();
+	cycleAll();
 	obj.func();
 	
 }
-function chatInput(){
+function chatInput(){	
 	bbs.node_action = 17;
 	var chatKey;
 	var chatMessage = "";
+	//chatKey = console.inkey();
+	footerBFrame.clear();
+	footerBFrame.cycle();
 	while(chatKey != '\t') { 
+	
 		timerCheck();
-		chatKey = console.inkey();	
+		chatKey = console.inkey();
 		if(chatKey == "\t"){
 			footerBFrame.clear();
 			contextSwitch(contextNum + 1);
 			return;
-		}	
-		if(chatKey == "\r" || chatKey == "\n"){
+		}	if(chatKey == "\r" || chatKey == "\n"){  // submit messages
 				chat.submit(channels[channel_index],chatMessage);
+					footerBFrame.clear();
+					cycleAll();
 				chatMessage = "";
 		} else if(chatKey == "\b" && chatMessage.length > 0) { //handle delete
 			chatMessage = chatMessage.substring(0,chatMessage.length - 1);
@@ -153,26 +201,25 @@ function chatInput(){
 			chatMessage += chatKey;
 			footerBFrame.putmsg(chatKey);
 			footerBFrame.cycle();
-		}				
+		}	
+		
+
 	}  //end while
 	footerBFrame.clear();
 	footerBFrame.cycle();
 }
 
-function submitChatMessage(messageString){
-	chatOutputFrame.putmsg(messageString);
-	footerBFrame.clear();
-	chatOutputFrame.cycle();
-}
+
 function menuControl(){
 	bbs.node_action = 0;
-	tree.open();
+	menuTree.open();
 	cycleAll();
 	var k;
 	while(k != "\t"){
 		k = console.inkey();
-		tree.getcmd(k);
-		tree.cycle();
+		menuTree.getcmd(k);
+		timerCheck();
+		menuTree.cycle();
 	}
 	contextSwitch(contextNum + 1);
 	return;
@@ -180,10 +227,6 @@ function menuControl(){
 
 }
 
-function messages(){  //let's make this function convert the message listing to trees and use anohter frame (pop up to display messages)
-	bbs.node_action = 1;
-	return;
-}
 
 function preRoll(){
 	console.putmsg("PRE-ROLL");
@@ -191,4 +234,53 @@ function preRoll(){
 }
 
 
+function verifyLocalCache(chan) {
+	if(channels_map[chan.name] == undefined) {
+			
+		chatOutputFrame.cleartoeol();
+		chatOutputFrame.putmsg("joining channel: " + chan.name + "\r\n", chanJoinBG|chanJoinFG);
+		chatOutputFrame.cleartoeol();
+			
+		channels_map[chan.name] = channels.length;
+		channel_index = channels.length;
+		channels.push(chan.name);
+	}
+}
+
+function updateLocalCache() {
+	/* verify local channel cache */
+	for(var c in channels_map) {
+		if(!chat.channels[c.toUpperCase()]) {
+			chatOutput.cleartoeol();
+			chatOutput.putmsg("parting channel: " + c);
+			
+			channels.splice(channels_map[c],1);
+			delete channels_map[c];
+			if(!channels[channel_index])
+				channel_index = channels.length-1;
+			}	
+		}}
+
+function printMessage(chan,msg) {	
+	if(!msg.nick)
+	{
+			return msg.str;
+	}
+		
+
+		msgstring =  "[" + chan.name + "]" + msg.nick.name + ":" + msg.str;  // this is the original code to construct a msgstring variable
+//conditional formatting - is the message sent from you or someone else?		
+			var strChat = "";
+		if(msg.nick.name == user.alias)
+		{
+		    strChat = "\1c" +  chan.name + "\1h\1y" +  msg.nick.name + "\1n\1w:" + msg.str;
+		    return strChat;
+		
+		}
+		else
+		{
+		strChat = "\1h\1c" +  chan.name + "\1h\1r" +  msg.nick.name + "\1n:\1h\1w" + msg.str;
+                    return strChat;
+		}
+}
 
