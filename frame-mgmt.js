@@ -22,16 +22,21 @@ tableA1BG = BG_BLUE;
 tableA1FG = WHITE;
 tableB1BG = BG_RED;
 tableB1FG = WHITE;
-tableA2BG = BG_MAGENTA;
+tableA2BG = BG_CYAN;
 tableA2FG = YELLOW;
-tableB2BG = BG_BROWN;
+tableB2BG = BG_MAGENTA;
 tableB2FG = YELLOW;
 leftBlockBG = BG_BLACK;
-leftBlockFG = YELLOW;
-rightBlockBG = BG_RED;
+leftBlockFG = LIGHTRED;
+rightBlockBG = BG_BROWN;
 rightBlockFG = BLACK;
 
-
+var msgBoaoardToMeDateFG = LIGHTCYAN;
+var msgBoaoardToMeDateBG = BG_BLACK;
+var msgBoardnameToMeSenderNameFG = GREEN;
+var msgBoardnameToMeSenderNameBG = BG_BLACK;
+var msgBoardToMeTopicFG = WHITE;
+var msgBoardToMeTopicBG = BG_BLACK;
 // GLOBAL VARIABLES
 
 
@@ -60,20 +65,13 @@ if(termWidth % 2 != 0){
 	var tableB1Frame = new Frame(menuFrame.width + 1 + tableA1Frame.width, 2 + chatOutputFrame.height,termWidth-tableA1Frame.width - menuFrame.width,1, tableB1BG|tableB1FG);
 	var tableB2Frame = new Frame(menuFrame.width + 1 + tableA1Frame.width, 3 + chatOutputFrame.height,termWidth-tableA1Frame.width - menuFrame.width,tableA2Frame.height, tableB2BG|tableB2FG);
 	var leftBlockFrame = new Frame(1,2 + menuFrame.height + localNodeFrame.height,menuFrame.width + tableA1Frame.width, console.screen_rows - 2 - menuFrame.height - localNodeFrame.height, leftBlockBG|leftBlockFG);
+	leftBlockFrame.word_wrap = true;
 	var rightBlockFrame = new Frame(leftBlockFrame.width + 1, leftBlockFrame.y, console.screen_columns - leftBlockFrame.width, leftBlockFrame.height, rightBlockBG|rightBlockFG);
 
 function mainFrameInit(){
 	openFrames();
 	//headerFrame.putmsg(rssTickerString);
-	footerBFrame.putmsg("{-*=8}0p")
 	drawFrames();
-	mainFrame.putmsg("\1h\1yHello.");
-	localNodeFrame.putmsg("testes?");
-	tableA1Frame.center("wtf?");
-	tableB1Frame.center("booty jamming funk");
-	leftBlockFrame.putmsg("dskdskdvhdifheihuehfiuhoifcxnmsnkd wdoksdn ondof nfowfowjfoiwj fij fwofjodfjo ij fwdojfdojds j oijoijfdoijfd odsfjioj oifdjoijfd oifdoijsdf oijdfo sdfoijfd ")
-	tableB2Frame.center("butt\r\n hey hey ");
-	tableA2Frame.putmsg("it's cool to be gay");
 	cycleAll();
 }
 
@@ -94,7 +92,31 @@ function openFrames(){
 	leftBlockFrame.open();
 	rightBlockFrame.open();
 }
+function invalidateFrames(){	
 
+	mainFrame.invalidate();
+	bodyFrame.invalidate();
+	menuFrame.invalidate();
+	headerFrame.invalidate();
+	footerAFrame.invalidate();
+	footerBFrame.invalidate();
+	chatOutputFrame.invalidate();
+	localNodeFrame.invalidate();
+	tableA1Frame.invalidate();
+	tableA2Frame.invalidate();
+	tableB1Frame.invalidate();
+	tableB2Frame.invalidate();
+	leftBlockFrame.invalidate();
+	rightBlockFrame.invalidate();
+	//cycleAll();
+}
+
+function refreshScreen(){
+	invalidateFrames();
+	openFrames();
+	drawFrames();
+	cycleAll();
+}
 function cycleAll(){	
 
 	bodyFrame.cycle();
