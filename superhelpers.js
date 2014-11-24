@@ -15,8 +15,10 @@ function showLocalNodes(){
 		}
 	}
 
-localNodeFrame.putmsg(nodeString + "\r\n" + showCoaNodes());
-tableA2Frame.center(onlineCount + " users online");
+var coaRetrieve = showCoaNodes();
+localNodeFrame.putmsg(nodeString + "\r\n" + coaRetrieve.userList);
+var totalOnline = onlineCount + coaRetrieve.numCoaUsers;
+tableA1Frame.center(totalOnline + " users online");
 //tableA1Frame.cycle();
 //localNodeFrame.cycle();
 return;
@@ -27,18 +29,20 @@ load(system.mods_dir + "coa/coa.js");
 var coa = new COA();
 function showCoaNodes(){
 var coaNodeString = "";
+var coaUsersOnline = 0;
 coa.cycle();
 //console.putmsg(JSON.stringify(coa.presence));
 for(i=0; i<coa.presence.length; i++){
 	var coaBBS = coa.presence[i];
-	
 	for(j=0; j < coaBBS.nodes.length;j++){
 			if(coaBBS.nodes[j].status == 3 && coaBBS.system != system.name){
 				coaNodeString += coaBBS.nodes[j].alias + "\r\n\1y" + coaBBS.system + "\r\n";
+				coaUsersOnline++;
 			}
 	}
 }
-	return coaNodeString;
+	var coaInfoObj = {userList:coaNodeString,numCoaUsers:coaUsersOnline}
+	return coaInfoObj;
 }
 
 load("rss-atom.js");
