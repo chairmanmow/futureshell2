@@ -1,3 +1,7 @@
+to run beta :
+
+just execute supershell.js
+
 futureshell2
 ============
 
