@@ -16,6 +16,7 @@ var the_loop;
 var contextNum = 0; //starting context
 var timer = new Timer();
 var event1 = timer.addEvent(2000,true,eventOne);
+var eventTwenty = timer.addEvent(1000,true,rssCycle);
 var nodeListtimer = timer.addEvent(10000,true,showLocalNodes)
 eventDebugCounter = 0;
 var localJSONclient = new JSONClient("127.0.1.1",10088);
@@ -87,7 +88,7 @@ var contexts = [
 		
 		}}];
 
-var contextNumStop = contexts.length; //ghetto array pointers
+//var contextNumStop = contexts.length; //ghetto array pointers
 var context = contexts[contextNum];
 
 
@@ -100,12 +101,13 @@ mainFrameInit();
 //headerFrame.putmsg(rssTickerString);
 showLocalNodes();
 msgList.display();
+grabFeed();
 eventOne();
 cycleAll();
 
 function mainLoop(){
 	//showLocalNodes();
-	contextSwitch(1);
+	contextSwitch(contextNum);
 	//testA();
 	while(the_loop = true){
 
@@ -139,18 +141,25 @@ mainLoop();
 
 
 function eventOne(){
-	if(rssTickerCounter > theTickerString.length){
-		rssLoopIndex++;
+
+	/*if(rssTickerCounter > theTickerString.length){
+		rssLoopIndex++;  // go to next feed
 		headerFrame.clear();
 		cycleAll();
 		theTickerString = rssString();
 		rssString();
+	} else {
+	
 	}
-	bodyFrame.putmsg(theTickerString.length + "|" + rssTickerCounter + "|");  //debuggers
+	*/
+	//bodyFrame.putmsg(theTickerString.length + "|" + rssTickerCounter + "|");  //debuggers
+	//headerFrame.scroll(1,0);
+	//rssCycle();
 	chatCycle();
 	eventDebugCounter++;
 	rssTickerCounter++;
-	headerFrame.scroll(0,1);
+
+	//headerFrame.scrollTo(headerFrame.width + rssTickerCounter,1);
 	cycleAll();
 }
 
