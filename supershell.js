@@ -83,7 +83,9 @@ var contexts = [
 				if(a_key == KEY_UP || a_key == KEY_DOWN){
 					msgList.interact();
 				}
+				timerCheck();
 				cycleAll();
+
 			}
 		
 		}}];
@@ -239,7 +241,7 @@ function menuControl(){
 	cycleAll();
 	var k;
 	while(k != "\t"){
-		k = console.inkey();
+		k = console.inkey(K_NONE, 5);
 		menuTree.getcmd(k);
 		timerCheck();
 		menuTree.cycle();
