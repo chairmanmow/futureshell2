@@ -51,7 +51,9 @@ if(termWidth % 2 != 0){
 
 	var mainFrame = new Frame(1,1,termWidth,termHeight);
 	var headerFrame = new Frame(1,1,termWidth,1,headerBG|headerFG);
-	headerFrame.parent = mainFrame;
+	headerFrame.h_scroll = true;
+	headerFrame.checkbounds = false;
+	//headerFrame.parent = mainFrame;
 	var footerAwidth = (console.screen_columns - console.screen_columns % 4)/4;
 	var footerAFrame = new Frame(1,termHeight,footerAwidth,1,footerABG|footerAFG);
 	var footerBFrame = new Frame(footerAwidth + 1,termHeight,termWidth - footerAwidth,1,footerBBG|footerBFG);
