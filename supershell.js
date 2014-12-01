@@ -15,8 +15,8 @@ load(system.mods_dir + "coa/coa-client.js");
 var the_loop;
 var contextNum = 0; //starting context
 var timer = new Timer();
-var event1 = timer.addEvent(2000,true,eventOne);
-var eventTwenty = timer.addEvent(1000,true,rssCycle);
+var event1 = timer.addEvent(1000,true,eventOne);
+var eventTwenty = timer.addEvent(15000,true,rssCycle);
 var nodeListtimer = timer.addEvent(10000,true,showLocalNodes)
 eventDebugCounter = 0;
 var localJSONclient = new JSONClient("127.0.1.1",10088);
@@ -240,11 +240,18 @@ function menuControl(){
 	menuTree.open();
 	cycleAll();
 	var k;
+
 	while(k != "\t"){
 		k = console.inkey(K_NONE, 5);
 		menuTree.getcmd(k);
-		timerCheck();
 		menuTree.cycle();
+		timerCheck();
+		/*
+		log(LOG_DEBUG,testTree.toSource());
+	 	log(LOG_DEBUG,"is this a tree? " + testTree instanceof Tree);
+	 	log(LOG_DEBUG,"is this a tree item? " + testTree instanceof TreeItem);
+	 	console.pause();
+	 	*/
 	}
 	contextSwitch(contextNum + 1);
 	return;
