@@ -167,28 +167,31 @@ function MsgList(){
 		tempRightBlockFrame.draw();
 		//chatOutputFrame.putmsg("is it drawing the temp frame?");
 		cycleAll();
-		var msgTreeKey = console.inkey();
+		var a_key = console.inkey();
 		msgTree.open();
 
-		while(msgTreeKey != '\t'  || msgTreeKey != KEY_RIGHT  || msgTreeKey != KEY_LEFT){
-			msgTreeKey = console.inkey();
-			if(msgTreeKey == "N"  || msgTreeKey == "n") {
-					//chatOutputFrame.putmsg("msgTreekey to uppercase N received");
+		while(a_key != '\t'  || a_key != KEY_RIGHT  || a_key != KEY_LEFT){
+			a_key = console.inkey();
+			if(a_key == "E"  || a_key == "e"){
+				displayMessage();
+			}
+			if(a_key == "N"  || a_key == "n") {
+					//chatOutputFrame.putmsg("a_key to uppercase N received");
 					leftBlockFrame.scroll(0,leftBlockFrame.height - 1);
 					cycleAll();
 				}
-				if(msgTreeKey == "P"  || msgTreeKey == "p") {
+				if(a_key == "P"  || a_key == "p") {
 					leftBlockFrame.scroll(0,-(leftBlockFrame.height - 1));
 					cycleAll();
 					}
-			if(msgTreeKey == KEY_UP || msgTreeKey == KEY_DOWN  || msgTreeKey == "\r" || msgTreeKey == "\n"){		
-			msgTree.getcmd(msgTreeKey);
+			if(a_key == KEY_UP || a_key == KEY_DOWN  || a_key == "\r" || a_key == "\n"){		
+			msgTree.getcmd(a_key);
 		}
 			msgTree.cycle();
 			timerCheck();
 			//cycleAll();
-			if(msgTreeKey == KEY_LEFT || msgTreeKey == KEY_RIGHT){
-				if(msgTreeKey == KEY_LEFT){
+			if(a_key == KEY_LEFT || a_key == KEY_RIGHT){
+				if(a_key == KEY_LEFT){
 					msgSwitch = "prevSub";
 				} else {
 					msgSwitch = "nextSub";
@@ -204,7 +207,7 @@ function MsgList(){
 				contextSwitch(2);
 				//return;
 			}
-			if(msgTreeKey == "\t"){
+			if(a_key == "\t"){
 				tempRightBlockFrame.delete();
 				tempRightBlockFrame.invalidate();
 				msgTree.close();
@@ -217,6 +220,7 @@ function MsgList(){
 		this.display();
 		contextSwitch(contextNum + 1);
 	}//end interact
+
 		function readMessage(msgNum) {
 		mbcode = bbs.cursub_code;
 		var readingMb = new MsgBase(mbcode);
@@ -234,6 +238,9 @@ function MsgList(){
 
 		cycleAll();
 		
+}
+function expandMessage(){
+
 }
 
 cycleAll();
@@ -283,22 +290,48 @@ if(msgSwitch == "nextSub" || msgSwitch == "prevSub") {  // handling sub canges
 	}
 
 function displayMessage() {
+
+		var msgPopUpFrame = new Frame(
+			x=		2,
+			y=		2,
+			width=	console.screen_columns-2,
+			height=	console.screen_rows -2,
+			attr= BG_BLACK|CYAN,
+			parent=	js.global.frame
+	);
+		//msgPopUpFrame.putmsg(caseDesc);
+		msgPopUpFrame.open();
+		msgPopUpFrame.draw();
 		mbcode = bbs.cursub_code;
 		var readingMb = new MsgBase(mbcode);
 		msgBaseIndex = readingMb;
 		msgNumIndex = msgNum;
 		readingMb.open();
-		leftBlockFrame.clear();
 		var body = msgBaseIndex.get_msg_body(msgNumIndex);
 		readingMb.close();
 		////chatOutputFrame.putmsg("length of message body : " + body.length);
 		footerBFrame.clear();
-		leftBlockFrame.putmsg(body);
-		footerBFrame.putmsg("\1h\1wControls : \1y(N)\1wext Page \1y(P)\1wPrevious Page \1y(E)\1wxpand");
-		leftBlockFrame.scrollTo(1,1);
-
+		msgPopUpFrame.putmsg(body);
+		footerBFrame.putmsg("\1y(N)\1wext Page \1y(P)\1wPrevious Page \1y(X)\1wExit");
+		msgPopUpFrameFrame.scrollTo(1,1);
 		cycleAll();
-	}
+		//all the initialization and loading of the message should becomplete.  now to get input
+		var a_key = console.inkey();
+		while(a_key != "x" ||a_key != "X"){
+		if(a_key == "N"  || a_key == "n") {
+					msgPopUpFrame.scroll(0,msgPopUpFrame.height - 1);
+					cycleAll();
+				}
+				if(a_key == "P"  || a_key == "p") {
+					msgPopUpFrame.scroll(0,-(msgPopUpFrame.height - 1));
+					cycleAll();
+					}
+		//let's try to handlers for changing groups, messages
+		if(a_key == "-" || a_key == "+" || a_key == "<" || a_key == ">" || a_key == "[" || a_key == ""){
+
+	}  // end while for get in put
+}
+}
 
 function messageViewer(){  //let's make this function convert the message listing to trees and use anohter frame (pop up to display messages)
 	
