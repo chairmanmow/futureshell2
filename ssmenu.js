@@ -35,6 +35,10 @@ menuTree.colors = {
 	menuTree.addItem("|post msg in this forum",forumPost);
 	menuTree.addItem("kill",kill);
 	menuTree.addItem("|trade wars 2002",tradeWars);
+	var testSubTree = new Tree();
+	menuTree.addTree(testSubTree);
+	
+	/*
 	testTree = menuTree.addTree("|piss shit fuck");
 	/*
 	var forumTree = menuTree.addTree("|forums");
@@ -49,6 +53,7 @@ menuTree.colors = {
 		forumTree.addItem("t|radtional bbs message reader",traditionalForum);
 		forumTree.addItem("|new message scan",newMsgScan);
 */
+/*
 	var  gameTree = menuTree.addTree("games");
 	var dosDoorgameTree = gameTree.addTree("|old school classics")
 		dosDoorgameTree.addItem("|trade wars 2002",tradeWars);
@@ -100,13 +105,14 @@ var userTree = menuTree.addTree("|user lists and matchmaking");
 	userTree.addItem("|match maker",synchroMM);
 */
 
+/*
 var bbsFunctionTree = menuTree.addTree("|bbs functions");
 	bbsFunctionTree.addItem("|default user settings",defaultUser);
 	bbsFunctionTree.addItem("|information & statistics on bbs",bbsInfoStat);
 	bbsFunctionTree.addItem("|node activity log",listNodeActivity);
 	bbsFunctionTree.addItem("bbs |auto message",autoMsg);
 	bbsFunctionTree.addItem("interbbs |ANSI machine",ansiWall);
-
+*/
 
 menuTree.open();
 
