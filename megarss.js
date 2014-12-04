@@ -3,10 +3,18 @@
 		rssFeedsIndex = 0;
 
 		var rssFeeds = new Array();
-		rssFeeds[0] = "http://feeds.feedburner.com/DrudgeReportFeed";
-		rssFeeds[1] = "http://mlb.mlb.com/partnerxml/gen/news/rss/mlb.xml";
-		rssFeeds[2] = "http://www.grudgemirror.com/feed/";
-
+rssFeeds[0] = "http://www.nba.com/rss/nba_rss.xml";
+rssFeeds[1] = "http://feeds.feedburner.com/DrudgeReportFeed";
+rssFeeds[2] = "http://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml";
+rssFeeds[3] = "http://rss.cnn.com/rss/cnn_topstories.rss";
+rssFeeds[4] = "http://mlb.mlb.com/partnerxml/gen/news/rss/mlb.xml";
+rssFeeds[5] = "http://feeds.reuters.com/reuters/technologyNews";
+rssFeeds[6] = "http://feeds.reuters.com/reuters/businessNews";
+rssFeeds[7] = "http://www.grudgemirror.com/feed/"
+rssFeeds[8] = "http://web.mit.edu/newsoffice/topic/humanities.feed";
+rssFeeds[9] = "http://www.npr.org/rss/rss.php?id=1039";
+rssFeeds[10] = "http://http://www.usmagazine.com/celebrity_news/rss";
+rssFeeds[11] = "http://rss.nytimes.com/services/xml/rss/nyt/Sports.xml";
 
 	// you can only use one rssString or rssCyckle depending on how the headerFrame works because rssTickerCounter is used in different ways
 	// for each function... not good form, but hey i could fix it. rssCycle is designed to return one object at a time.
@@ -54,6 +62,7 @@
 
 		grabToggle = false;
 		currentFeedObject = new Feed(feedToConvert);
+		headerFrame.putmsg("\1h\1y" + currentFeedObject.channels[rssChannelIndex].title.substring(0,headerFrame.width) + "\1n--");
 		//chatOutputFrame.putmsg("new rss");   
 		//rssCycle();
 		//currentFeedObject.load();
