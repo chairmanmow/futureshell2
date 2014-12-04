@@ -30,17 +30,17 @@ menuTree.colors = {
 		// tree expansion foreground
 		xfg:LIGHTCYAN
 	}
-	menuTree.addItem("shit",shit);
+	menuTree.addItem("instant message",telegram);
 	menuTree.addItem("e-|mail and messages", netMailSection);
-	menuTree.addItem("|post msg in this forum",forumPost);
-	menuTree.addItem("kill",kill);
-	menuTree.addItem("|trade wars 2002",tradeWars);
-	var testSubTree = new Tree();
-	menuTree.addTree(testSubTree);
-	
-	/*
-	testTree = menuTree.addTree("|piss shit fuck");
-	/*
+	//menuTree.addItem("|post msg in this forum",forumPost);
+	//menuTree.addItem("kill",kill);
+	//menuTree.addItem("|trade wars 2002",tradeWars);
+	//var testSubTree = new Tree();
+	//menuTree.addTree(testSubTree);
+
+
+	//testTree = menuTree.addTree("|piss shit fuck");
+
 	var forumTree = menuTree.addTree("|forums");
 		forumTree.addItem("message|lister",digdistML);
 		forumTree.addItem("|post msg in this forum",forumPost);
@@ -52,19 +52,22 @@ menuTree.colors = {
 		forumTree.addItem("|threaded message viewer",ecReader);
 		forumTree.addItem("t|radtional bbs message reader",traditionalForum);
 		forumTree.addItem("|new message scan",newMsgScan);
-*/
-/*
+
 	var  gameTree = menuTree.addTree("games");
 	var dosDoorgameTree = gameTree.addTree("|old school classics")
 		dosDoorgameTree.addItem("|trade wars 2002",tradeWars);
 		dosDoorgameTree.addItem("|legend of the red dragon",lordBLink);
+		dosDoorgameTree.addItem("usurper",coaUsurper);
+		dosDoorgameTree.addItem("barren realms",coaBRE);
+		dosDoorgameTree.addItem("falcon's eye",coaFalcon);
+		dosDoorgameTree.addItem("global war",  globalWar);
+		dosDoorgameTree.addItem("top rank boxing", topRankBoxing);
 		dosDoorgameTree.addItem("|2 l.o.r.d. II",lord2BLink);
 		dosDoorgameTree.addItem("|pimp wars",pimpBLink);
 		dosDoorgameTree.addItem("|planet t.e.o.s.",teosBLink);
 		dosDoorgameTree.addItem("|operation overkill ii",overkillBLink);
 		dosDoorgameTree.addItem("lunati|x",lunatix);
 		dosDoorgameTree.addItem("|bbs crash",bbsCrash);
-	/*		
 
 	var jsDoorgameTree = gameTree.addTree("|new school games");
 		jsDoorgameTree.addItem("Doubles aka |2048",doublesGame)
@@ -80,6 +83,8 @@ menuTree.colors = {
 		jsDoorgameTree.addItem("thirsty|ville",thirstyVille);
 		jsDoorgameTree.addItem("ma|ze race",mazeRace);
 		jsDoorgameTree.addItem("|oregon trail(in Games Section", xtrnMenuSec);
+
+		gameTree.addItem("|more external programs(unorganized)",xtrnMenuSec)
 
 	var portalTree =  menuTree.addTree("|portals");
 		var bbsTree = portalTree.addTree("|bbs's");
@@ -103,32 +108,110 @@ var chatTree = menuTree.addTree("Internet Relay |Chat");
 var userTree = menuTree.addTree("|user lists and matchmaking");
 	userTree.addItem("|list of users",userLister);
 	userTree.addItem("|match maker",synchroMM);
-*/
 
-/*
 var bbsFunctionTree = menuTree.addTree("|bbs functions");
 	bbsFunctionTree.addItem("|default user settings",defaultUser);
 	bbsFunctionTree.addItem("|information & statistics on bbs",bbsInfoStat);
 	bbsFunctionTree.addItem("|node activity log",listNodeActivity);
 	bbsFunctionTree.addItem("bbs |auto message",autoMsg);
 	bbsFunctionTree.addItem("interbbs |ANSI machine",ansiWall);
-*/
-
-menuTree.open();
-
-
-function games(){
-	chatOutputFrame.putmsg("fuck we don't got no games yet");
-	cycleAll();	
+if(user.compare_ars("SYSOP or EXEMPT Q or I or N") || (bbs.sys_status&SS_TMPSYSOP)) {  //Sysop menu
+bbsFunctionTree.addItem("s|ysop menu", sysopMenu);
 }
-function shit(){
-	chatOutputFrame.putmsg("shit");
-	cycleAll();
-}
+menuTree.addItem("logoff",logoffTheBBS);
+
+//menuTree.open();
+
+
+
 
 function kill(){
 	the_loop = false;
 	throw "kill switch thrown";
+}
+
+function telegram(){	
+
+	var popUpFrame = new Frame(
+			x=		console.screen_columns/4,
+			y=		parseInt(console.screen_rows/6),
+			width=	console.screen_columns/2,
+			height=	parseInt((console.screen_rows/2)*.7),
+			attr= popUpFrameBG|popUpFrameFG,
+			parent=	js.global.frame
+	);
+	var popUpFrameHeader = new Frame(popUpFrame.x,popUpFrame.y - 2,popUpFrame.width,2,BG_BLUE|YELLOW);
+	popUpFrameHeader.parent = popUpFrame;
+	var popUpFrameFooter = new Frame(popUpFrame.x,popUpFrame.y+popUpFrame.height,popUpFrame.width,3,BG_BLUE|YELLOW);
+	popUpFrameFooter.parent = popUpFrame;
+	popUpFrameHeader.open();
+	popUpFrameHeader.draw();
+	popUpFrame.open();
+	popUpFrameFooter.open();
+	popUpFrameFooter.draw();
+	popUpFrame.draw();
+	popUpFrame.putmsg("  From : " + user.name + "\r\n  To: ");
+	popUpFrame.cycle();
+	popUpFrameHeader.putmsg("Please enter the name of your recipient below...");
+	popUpFrameHeader.cycle();
+	var telegramRecipient = "";
+	var str_key = console.getkey();
+	telegramRecipient += str_key;
+	popUpFrameFooter.putmsg(str_key);
+		popUpFrameFooter.cycle();
+	while(str_key){
+		str_key = console.getkey();
+		if(str_key == "\r" || str_key == "\n"){
+			break;
+		}
+		telegramRecipient += str_key;
+		popUpFrameFooter.putmsg(str_key);
+		popUpFrameFooter.cycle();
+	}
+	popUpFrame.putmsg(telegramRecipient + "\r\n\r\n  Message : ");
+	popUpFrameFooter.clear();
+	popUpFrameFooter.cycle();
+	popUpFrame.cycle();
+	var telegramBody = "";
+	str_key = console.getkey();
+	telegramBody += str_key;
+	popUpFrameFooter.putmsg(str_key);
+		popUpFrameFooter.cycle();
+	while(str_key){
+		str_key = console.getkey();
+		if(str_key == "\r" || str_key == "\n"){
+			break;
+		}
+		telegramBody += str_key;
+		popUpFrameFooter.putmsg(str_key);
+		popUpFrameFooter.cycle();
+	}
+	popUpFrame.putmsg(telegramBody + "\r\n\r\n\1i\1yDo you want to submit this message???");
+	popUpFrame.cycle();
+	str_key = console.getkey();
+	while(str_key){
+if(str_key == "Y" || str_key == "y"){
+		popUpFrame.putmsg("\r\n\1wSubmitting Messsage");
+		popUpFrame.cycle();
+		var coa2 = new COA();
+		coa2.sendTelegram(telegramRecipient,user.name,telegramBody);
+		coa2.cycle();
+		mswait(1500);
+		refreshScreen();
+		return;
+	} else if(str_key == "N" || str_key == "n"){
+	popUpFrame.putmsg("ABORTED ABORTED");
+	popUpFrame.cycle();
+		break;
+	}else {
+		popUpFrame.clear();
+		popUpFrameHeader.center("\1iEnter Y or N");
+		popUpFrameHeader.cycle();
+		str_key = console.getkey();
+	}
+}
+	mswait(1500);
+	refreshScreen();
 }
 // COMMAND CONFIRM FUNCTION
 
@@ -175,6 +258,48 @@ console.pause();
 
                         return;
                         }
+
+function coaUsurper(){
+caseDesc = "Usurper";
+			commandConfirm();
+			bbs.exec_xtrn("SURPER");
+			refreshScreen();
+			return;
+}
+
+function coaBRE(){
+caseDesc = "Barren Realms Elite";
+			commandConfirm();
+			bbs.exec_xtrn("COABRE");
+			refreshScreen();
+			return;
+}
+
+function coaFalcon(){
+		caseDesc = "Falcon's Eye";
+			commandConfirm();
+			bbs.exec_xtrn("COAFE");
+			refreshScreen();
+			return;
+}
+function globalWar(){
+		caseDesc = "Global War";
+			commandConfirm();
+			bbs.exec_xtrn("COAGWAR");
+			refreshScreen();
+			return;
+}
+
+function topRankBoxing(){
+	caseDesc = "Top Rank Boxing";
+			commandConfirm();
+			bbs.exec_xtrn("COA");
+			refreshScreen();
+			return;
+}
+
+
+
 
 function bbsScene() {
 	caseDesc = "IRC NETWORK";
@@ -260,7 +385,7 @@ function netMailSection() {
 			
 function jumpForum() {
 caseDesc = "Change message Areas";
-			commandConfirm();
+			//commandConfirm();
 			load("../xtrn/ddac_105/DDMsgAreaChooser.js")
 			refreshScreen();
 			return;
@@ -429,21 +554,7 @@ caseDesc = "Explore Space and destroy time";
 			refreshScreen();
 			return;
 }
-function dragonsHoard(){
-caseDesc = "That dragon got too much shit \r\n take it back motherfucker!!";
-			commandConfirm();
-			bbs.exec_xtrn("DHOARD");
-			refreshScreen();
-			return;
-}
 
-function doorMud(){
-caseDesc = "This is not dirt mixed with water.. \r\n MUD=Multi-User Dungeon";
-			commandConfirm();
-			bbs.exec_xtrn("MECHWARS");
-			refreshScreen();
-			return;
-}
 function doublesGame(){
 caseDesc = "You are a DOG \r\n Give bitches bones and \r\n make puppies and shit and piss\rn\ in da house!!!";
 			commandConfirm();
@@ -452,13 +563,7 @@ caseDesc = "You are a DOG \r\n Give bitches bones and \r\n make puppies and shit
 			return;
 }
 
-function dogWorld(){
-caseDesc = "You are a DOG \r\n Give bitches bones and \r\n make puppies and shit and piss\rn\ in da house!!!";
-			commandConfirm();
-			bbs.exec_xtrn("DOGWORLD");
-			refreshScreen();
-			return;
-}
+
 
 	function starStocks() {
 			caseDesc = "This is a very addictive game if you ask Larry Lagomorph!";
@@ -690,3 +795,109 @@ caseDesc = "user help";
 			refreshScreen();
 			return;
 		}
+
+		//############################### E-mail Section ################################
+
+function email()
+{
+	var key;
+	var i;
+	while(1) {
+		if(!(user.settings & USER_EXPERT))
+			bbs.menu("e-mail");
+
+		// async
+
+		console.print("\r\nyhE-mail: n");
+		key=get_next_keys("?SRFNUKQ\r");
+		bbs.log_key(key);
+		switch(key) {
+			case '?':
+				if(user.settings & USER_EXPERT)
+					bbs.menu("e-mail");
+				break;
+
+			case 'S':
+				console.print("_\r\nbhE-mail (User name or number): w");
+				str=get_next_str("",40,K_UPRLWR,false);
+				if(str==null || str=="")
+					break;
+				if(str=="Sysop")
+					str="1";
+				if(str.search(/\@/)!=-1)
+					bbs.netmail(str);
+				else {
+					i=bbs.finduser(str);
+					if(i>0)
+						bbs.email(i,WM_EMAIL);
+				}
+				break;
+
+			case 'U':
+				console.print("_\r\nbhE-mail (User name or number): w");
+				str=get_next_str("",40,K_UPRLWR,false);
+				if(str==null || str=="")
+					break;
+				if(str=="Sysop")
+					str="1";
+				if(str.search(/\@/)!=-1)
+					bbs.netmail(str,WM_FILE);
+				else {
+					i=bbs.finduser(str);
+					if(i>0)
+						bbs.email(i,WM_EMAIL|WM_FILE);
+				}
+				break;
+
+			case 'R':
+				bbs.read_mail(MAIL_YOUR);
+				break;
+
+			case 'F':
+				bbs.email(1,WM_EMAIL,bbs.text(ReFeedback));
+				break;
+
+			case 'N':
+				if(console.noyes("\r\nAttach a file"))
+					i=WM_FILE;
+				else
+					i=0;
+				console.putmsg(bbs.text(EnterNetMailAddress),P_SAVEATR);
+				str=get_next_str("",60,K_LINE,false);
+				if(str!=null && str !="")
+					bbs.netmail(str,i);
+				break;
+
+			case 'K':
+				bbs.read_mail(MAIL_SENT);
+				break;
+
+			case 'Q':
+			default:
+				return;
+		}
+	}
+	return
+}
+function dogWorld(){
+caseDesc = "You are a DOG \r\n Give bitches bones and \r\n make puppies and shit and piss\rn\ in da house!!!";
+			commandConfirm();
+			bbs.exec_xtrn("DOGWORLD");
+			refreshScreen();
+			return;
+}
+function dragonsHoard(){
+caseDesc = "That dragon got too much shit \r\n take it back motherfucker!!";
+			commandConfirm();
+			bbs.exec_xtrn("DHOARD");
+			refreshScreen();
+			return;
+}
+
+function doorMud(){
+caseDesc = "This is not dirt mixed with water.. \r\n MUD=Multi-User Dungeon";
+			commandConfirm();
+			bbs.exec_xtrn("MECHWARS");
+			refreshScreen();
+			return;
+}
