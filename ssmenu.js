@@ -30,10 +30,11 @@ menuTree.colors = {
 		// tree expansion foreground
 		xfg:LIGHTCYAN
 	}
+	menuTree.addItem("kill",kill);
 	menuTree.addItem("instant message",telegram);
 	menuTree.addItem("e-|mail and messages", netMailSection);
 	//menuTree.addItem("|post msg in this forum",forumPost);
-	//menuTree.addItem("kill",kill);
+
 	//menuTree.addItem("|trade wars 2002",tradeWars);
 	//var testSubTree = new Tree();
 	//menuTree.addTree(testSubTree);
