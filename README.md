@@ -1,5 +1,7 @@
 to run beta :
 
+Create supershell directory in sbbs/mods
+Put in mods/supershell directory
 just execute supershell.js
 
 futureshell2
