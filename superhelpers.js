@@ -3,14 +3,14 @@
 var oldNodeString = "";
 function showLocalNodes(){
 	var onlineCount = 0;
-	var nodeString = "";
+	var nodeString = "*\1yFuTur3l@nD\1w*\r\n";
 	localNodeFrame.clear();	
-	tableA1Frame.clear();
+	
 	for(i=0; i < system.node_list.length; i++){
 		
 		if(system.node_list[i].status == 3){
 			onlineCount++;
-			nodeString += "#" + i + ":" + system.username(system.node_list[i].useron) + "\r\n" + NodeAction[system.node_list[i].action] +"\r\n";
+			nodeString +=  system.username(system.node_list[i].useron) + "\r\n"; //+ NodeAction[system.node_list[i].action] +"\r\n"
 			//localNodeFrame.crlf();	
 		}
 	}
@@ -18,7 +18,7 @@ function showLocalNodes(){
 var coaRetrieve = showCoaNodes();
 localNodeFrame.putmsg(nodeString + "\r\n" + coaRetrieve.userList);
 var totalOnline = onlineCount + coaRetrieve.numCoaUsers;
-tableA1Frame.center(totalOnline + " users online");
+menuFooterFrame.center(totalOnline + " users online");
 //tableA1Frame.cycle();
 //localNodeFrame.cycle();
 return;
@@ -26,8 +26,48 @@ return;
 
 load(system.mods_dir + "coa/coa.js");
 
+mailWaiting = user.stats.mail_waiting;
+var nodeMsgFlag = false;
+
 var coa = new COA();
 function showCoaNodes(){
+var nodeMsgs = system.get_node_message(bbs.node_num);
+	if(nodeMsgs != null){
+		nodeMsgFlag = true;
+		if(nodeMsgs.substr(4,8) == "Telegram"){
+			tableA1Frame.clear();
+			tableA1Frame.center("\1i1n$t@nT m3$$@G3");
+			console.beep();
+		}
+		tableA2Frame.clear();
+		tableA2Frame.putmsg(nodeMsgs);
+		cycleAll();
+	}
+	if(user.stats.mail_waiting > mailWaiting){
+			nodeMsgFlag = false;
+			mailWaiting = user.stats.mail_waiting;
+				console.beep();
+				tableA1Frame.clear();
+				tableA1Frame.center("\1i\1hn3w 3-M@1L\1n");	
+				tableA1Frame.cycle();
+				mailWaiting = user.stats.mail_waiting;
+		}
+
+		if(user.stats.mail_waiting >= mailWaiting && nodeMsgFlag != true){
+			tableA2Frame.clear();
+			if(user.stats.mail_waiting > mailWaiting){
+					
+			}
+			if(user.stats.mail_waiting == mailWaiting ){
+			tableA2Frame.putmsg("You have " + user.stats.mail_waiting + " emails waiting");
+		}
+	tableA2Frame.cycle();
+};
+	//mailWaiting = user.stats.mail_waiting;
+
+
+
+
 var coaNodeString = "";
 var coaUsersOnline = 0;
 coa.cycle();
@@ -36,7 +76,7 @@ for(i=0; i<coa.presence.length; i++){
 	var coaBBS = coa.presence[i];
 	for(j=0; j < coaBBS.nodes.length;j++){
 			if(coaBBS.nodes[j].status == 3 && coaBBS.system != system.name){
-				coaNodeString += coaBBS.nodes[j].alias + "\r\n\1y" + coaBBS.system + "\r\n";
+				coaNodeString += "\1w*\1y" +coaBBS.system + "\1w*\r\n" + coaBBS.nodes[j].alias + "\r\n" ;
 				coaUsersOnline++;
 			}
 	}
@@ -45,29 +85,7 @@ for(i=0; i<coa.presence.length; i++){
 	return coaInfoObj;
 }
 
-load("rss-atom.js");
 
-function rssFeed(feedUrl){
-	var rssString = "";
-	var feedToFetch = feedUrl;
-	if(feedUrl == undefined) {
-		feedToFetch = "http://mlb.mlb.com/partnerxml/gen/news/rss/mlb.xml";
-	}
-	var f = new Feed(feedToFetch);
-	        for(var c = 0; c < f.channels.length; c++) {
-                rssString += f.channels[c].title + "\r\n";
-	                rssString += f.channels[c].updated + "\r\n";
-	                for(var i = 0; i < f.channels[c].items.length; i++) {
-                        rssString += f.channels[c].items[i].title + "\r\n";
-	                        rssString += f.channels[c].items[i].author + "\r\n";
-                        rssString += f.channels[c].items[i].date + "\r\n";
-	                        rssString += f.channels[c].items[i].body + "\r\n";
-                        rssString += "---\r\n";	                }
-	                rssString += "---\r\n";
-        }
-	        
-	        return rssString;
-}
 
 //message functions
 
