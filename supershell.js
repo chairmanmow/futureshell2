@@ -1,14 +1,17 @@
 //Libraries
-load("sbbsdefs.js");
-load("frame-mgmt.js");
-load("event-timer.js");
-load("superhelpers.js");
-load("ssmenu.js");
-load("json-client.js");
-load("json-chat.js");
-load("ssmsg.js");
-load("megarss.js");
 
+load("sbbsdefs.js");
+load(system.mods_dir + "supershell/frame-mgmt.js");
+load("event-timer.js");
+load(system.mods_dir + "supershell/superhelpers.js");
+load(system.mods_dir + "supershell/ssmsg.js");
+load(system.mods_dir + "supershell/ssmenu.js");
+load("json-client.js");
+load(system.mods_dir + "coa/coa-client.js");
+load("json-chat.js");
+load(system.mods_dir + "supershell/megarss.js");
+
+versionNumber = "2.0beta"
 
 load(system.mods_dir + "coa/coa-client.js");
 //globals
@@ -19,14 +22,15 @@ var event1 = timer.addEvent(1000,true,eventOne);
 var eventTwenty = timer.addEvent(15000,true,rssCycle);
 var nodeListtimer = timer.addEvent(10000,true,showLocalNodes)
 eventDebugCounter = 0;
-var localJSONclient = new JSONClient("127.0.1.1",10088);
-var chat = new JSONChat(user.number,localJSONclient);
-chat.join("#main");
+//var localJSONclient = new JSONClient("127.0.1.1",10088);
+var chat = new JSONChat(user.number,coaClient);
+chat.join("#coa");
 var channels = [];
 var channels_map = [];
 var channel_index = 0;
 var rssTickerCounter = 0;
 var theTickerString = rssString();
+var initMessage = "   Welcome " + user.name + " to the New Futureland shell version " + versionNumber+ "\r\n   It has all the old features with a slew of new ones (with more to come), and hopefully fewer bugs.  Use tab to switch from chat/messages/menu\r\n   Larger terminals are supported. If content is cut off, increase your term size and reconnect.";
 
 function chatCycle(){
 	for(var c in chat.channels) {
@@ -35,7 +39,7 @@ function chatCycle(){
 		verifyLocalCache(chan); // verify this channels presence in the local cache */				
 			/* display any new messages */
 		while(chan.messages.length > 0) {
-			chatOutputFrame.putmsg(printMessage(chan,chan.messages.shift()));
+			chatOutputFrame.putmsg(printMessage(chan,chan.messages.shift()) + "\r\n");
 		}
 		updateLocalCache();	
 		cycleAll();
@@ -46,18 +50,31 @@ function chatCycle(){
 //var rssTickerString = rssFeed();
 
 var contexts = [
-	{func_name:"chatInput",desc:"blah chat",
+	{func_name:"chatInput",desc:"\1i\1h\1kCHATTING ~-=>>",
 	func: function(){
-		
+		menuHeaderFrame.clear();
+		menuHeaderFrame.center("\1h\1bTAB *once* for Menu");
+		chatOutputHeaderFrame.clear();
+		chatOutputHeaderFrame.putmsg("Chatting. Type a message. \1h\1r *TAB* for other functions");
 		chatInput();
 	}},
-	{func_name:"menuControl",desc:"blah menu",func: function(){
+	{func_name:"menuControl",desc:"^^ MENU ACTIVE ^^",func: function(){
+		chatOutputHeaderFrame.clear();
+		chatOutputHeaderFrame.putmsg("Up/Down Arrows and Enter Keys to use Menu");
+		footerBFrame.clear();
+		footerBFrame.putmsg("*TAB* to browse message boards.")
+		menuHeaderFrame.clear();
+		menuHeaderFrame.center("\1h\1k\1iMENU ACTIVE\1n\1r *TAB*exits");
 		menuControl();
 	}},
-	{func_name:"message_lister",desc:"blah messages",
+	{func_name:"message_lister",desc:"Message Boards",
 	func: function(){
+		menuHeaderFrame.clear();
+		menuHeaderFrame.center("\1h\1bTAB **twice** for Menu");
+		chatOutputHeaderFrame.clear();
+		chatOutputHeaderFrame.putmsg("You're Browsing msg boards(bottom).\1h\1r*TAB* for Chat.");
 		footerBFrame.clear();
-		footerBFrame.putmsg("\1h\1wLeft/Right Arrows = Switch Areas, Up/Down = Browse Messages");
+		footerBFrame.putmsg("\1h\1w<-/->|Up/Down Arrows : Switch Areas|Browse Messages [J]ump");
 		mbcode = bbs.cursub_code;  // get the current code
 			cycleAll();
 			bbs.node_action = 1;
@@ -83,6 +100,10 @@ var contexts = [
 				if(a_key == KEY_UP || a_key == KEY_DOWN){
 					msgList.interact();
 				}
+				if(a_key == "J" || a_key == "j"){
+					jumpForum();
+					msgList.display();
+				}
 				timerCheck();
 				cycleAll();
 
@@ -97,15 +118,21 @@ var context = contexts[contextNum];
 
 
 
-
+bbs.sys_status|=SS_MOFF;  // this turns off the node messaging log ons/log offs
+oldPt = console.ctrlkey_passthru;
+console.ctrlkey_passthru="+PKUT";
 preRoll();
 mainFrameInit();
+leftBlockFrame.putmsg(initMessage);
+leftBlockHeaderFrame.center("***WELCOME MESSAGE***");
+tableA1Frame.center("NoTiFuNCaT$hunZ");
 //headerFrame.putmsg(rssTickerString);
 showLocalNodes();
 msgList.display();
 grabFeed();
 eventOne();
 cycleAll();
+
 
 function mainLoop(){
 	//showLocalNodes();
@@ -213,10 +240,16 @@ function chatInput(){
 			footerBFrame.clear();
 			contextSwitch(contextNum + 1);
 			return;
-		}	if(chatKey == "\r" || chatKey == "\n"){  // submit messages
+		}	
+if(chatKey == "KEY_UP" || chatKey == "KEY_DOWN"){
+				//do nothing for now, add scroll later
+		}
+		else if(chatKey == "\r" || chatKey == "\n"){  // submit messages
+			if(chatMessage.length > 0){
 				chat.submit(channels[channel_index],chatMessage);
 					footerBFrame.clear();
 					cycleAll();
+				}
 				chatMessage = "";
 		} else if(chatKey == "\b" && chatMessage.length > 0) { //handle delete
 			chatMessage = chatMessage.substring(0,chatMessage.length - 1);
@@ -261,8 +294,12 @@ function menuControl(){
 
 
 function preRoll(){
-	console.putmsg("PRE-ROLL");
+	console.putmsg("hey");
 	console.pause();
+bbs.exec_xtrn("LASTCALL");
+//bbs.exec_xtrn("SCREENSV");
+bbs.exec_xtrn("ONELNRZ");
+bbs.exec_xtrn("FLBULLET");
 }
 
 
@@ -290,6 +327,7 @@ function updateLocalCache() {
 			delete channels_map[c];
 			if(!channels[channel_index])
 				channel_index = channels.length-1;
+
 			}	
 		}}
 
