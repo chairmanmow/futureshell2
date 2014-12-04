@@ -1,3 +1,13 @@
+//colors
+ msgBoardToMeDateFG = LIGHTCYAN;
+msgBoardToMeDateBG = BG_BLACK;
+ msgBoardnameToMeSenderNameFG = GREEN;
+ msgBoardToMeTopicFG = WHITE;
+ msgBoardToMeTopicBG = BG_BLACK;
+
+
+//tracking variables
+
 var msgSwitch = new String;
 var mbcode = new String;
 var cursub = new String;
@@ -16,14 +26,14 @@ function MsgList(){
 		var mb = new MsgBase(mbcode);
 
 	this.display = function(){
-		footerBFrame.clear();
-		footerBFrame.putmsg("\1h\1wLeft/Right Arrows = Switch Areas, Up/Down = Browse Messages");
+		//footerBFrame.clear();
+		//footerBFrame.putmsg("\1h\1w<-/-> Arrows = Switch Areas, Up/Down = Browse Messages [J]ump");
 		mbcode = bbs.cursub_code;  // get the current code
 		currentBoard = new MsgBase(mbcode);
 		currentBoard.open();
 		rightBlockFrame.clear();
 		//chatOutputFrame.putmsg("msglist.display running");
-
+		
 		rightBlockFrame.clear();
 		//rightBlockFrame.invalidate();
 		//rightBlockFrame.open();
@@ -35,7 +45,7 @@ function MsgList(){
 			var cursub2 = msg_area.grp_list[bbs.curgrp].sub_list[bbs.cursub].name;
 			var curSubTotalMsgs = currentBoard.total_msgs;
 			var groupDescription = msg_area.grp_list[bbs.curgrp].description.substring(0,rightBlockFrame.width);
-			
+			//msgLastReadPointer = msg_area.grp_list[bbs.curgrp].sub_list[bbs.cursub].scan_ptr;
 		    var header = currentBoard.get_msg_header(m);
 		    if(header === null || header.attr&MSG_DELETE)
 		        continue;
@@ -49,7 +59,7 @@ function MsgList(){
 		        var subjLen = rightBlockFrame.width - poster.length - 6;  //creates a variable to create the width of subject without spilling to a new line
 		        var msgSubjTrim = msgSubj.substr(0,subjLen);
 					if(header.to == user.name || header.to == user.alias){
-					rightBlockFrame.putmsg(msgTimeTrim, msgBoaoardToMeDateBG|msgBoaoardToMeDateFG);
+					rightBlockFrame.putmsg(msgTimeTrim, msgBoardToMeDateBG|msgBoardToMeDateFG);
 					}
 			else
 			{
@@ -84,12 +94,12 @@ function MsgList(){
 		}
 		//chatOutputFrame.putmsg("msglist.display got through if/else");
 		tableB2Frame.clear();
-		tableB2Frame.center(cursub2.substring(0,rightBlockFrame.width));
+		tableB2Frame.putmsg("       " + cursub2.substring(0,rightBlockFrame.width)+"\r\nYou've made " + user.stats.total_posts + " posts\r\n");
 		tableB1Frame.clear();
-		tableB1Frame.center(groupDescription);
+		tableB1Frame.center(groupDescription );//+ msgLastReadPointer
 		tableB1Frame.cycle();
-		tableB2Frame.clear();
-		tableB2Frame.center(curSubTotalMsgs + " Total Msgs in Sub-Forum");
+		tableB3Frame.clear();
+		tableB3Frame.center(curSubTotalMsgs + " Total Msgs in ");
 		currentBoard.close();
 		cycleAll();
 	//refreshMsgTree();
@@ -105,9 +115,9 @@ function MsgList(){
 		cycleAll();
 		var msgTree = new Tree(tempRightBlockFrame,"message board test");
 		msgTree.colors = {
-		fg:BLACK,
+		fg:WHITE,
 		// non-current item/empty space background 
-		bg:BG_CYAN,
+		bg:BG_BLACK,
 		// current item foreground
 		lfg:WHITE,
 		// current item background
@@ -121,7 +131,7 @@ function MsgList(){
 		// hotkey foreground
 		kfg:YELLOW,
 		// tree branch foreground
-		tfg:BLACK,
+		tfg:RED,
 		// tree heading foreground
 		hfg:WHITE,
 		// tree heading background
@@ -147,7 +157,7 @@ function MsgList(){
 	        msgSubj = header.subject; //puts the value of the message subject in the variable
 	        var fromLen = header.from.length;  // gets length of posters name
 	        var poster = header.from.substr(0,10);
-	        var subjLen = 40 - poster.length - 5;  //creates a variable to create the width of subject without spilling to a new line
+	        var subjLen = rightBlockFrame.width - poster.length - 5;  //creates a variable to create the width of subject without spilling to a new line
 	        var msgSubjTrim = msgSubj.substr(0,subjLen);
 	        var headerIndex = header.number;
 	        var concatDisplay = new String;
@@ -174,6 +184,9 @@ function MsgList(){
 			a_key = console.inkey();
 			if(a_key == "E"  || a_key == "e"){
 				displayMessage();
+			}
+			if(a_key == "j"  || a_key == "J"){
+				jumpForum();
 			}
 			if(a_key == "N"  || a_key == "n") {
 					//chatOutputFrame.putmsg("a_key to uppercase N received");
@@ -228,10 +241,13 @@ function MsgList(){
 		msgNumIndex = msgNum;
 		readingMb.open();
 		leftBlockFrame.clear();
+		var readingHeader = readingMb.get_msg_header(msgNum);
 		var body = readingMb.get_msg_body(msgNum);
 		readingMb.close();
 		////chatOutputFrame.putmsg("length of message body : " + body.length);
 		footerBFrame.clear();
+		leftBlockHeaderFrame.clear();
+		leftBlockHeaderFrame.putmsg(readingHeader.from + " rambled about " + readingHeader.subject)
 		leftBlockFrame.putmsg(body);
 		footerBFrame.putmsg("\1h\1wControls : \1y(N)\1wext Page \1y(P)\1wPrevious Page \1y(E)\1wxpand");
 		leftBlockFrame.scrollTo(1,1);
@@ -239,9 +255,7 @@ function MsgList(){
 		cycleAll();
 		
 }
-function expandMessage(){
 
-}
 
 cycleAll();
 }
@@ -290,34 +304,68 @@ if(msgSwitch == "nextSub" || msgSwitch == "prevSub") {  // handling sub canges
 	}
 
 function displayMessage() {
-
-		var msgPopUpFrame = new Frame(
+	function messagePopUp(){
+		var msgPopUpHeaderFrame = new Frame(
 			x=		2,
 			y=		2,
 			width=	console.screen_columns-2,
-			height=	console.screen_rows -2,
-			attr= BG_BLACK|CYAN,
+			height=	4,
+			attr= BG_GREEN|BLACK,
+			parent=	js.global.frame
+	);
+		var msgPopUpFrame = new Frame(
+			x=		2,
+			y=		6,
+			width=	console.screen_columns-2,
+			height=	console.screen_rows -12,
+			attr= BG_BLACK|GREEN,
+			parent=	js.global.frame
+	);
+		var msgPopUpFooterFrame = new Frame(
+			x=		2,
+			y=		msgPopUpFrame.height + 6,
+			width=	console.screen_columns-2,
+			height=	3,
+			attr= BG_GREEN|BLACK,
 			parent=	js.global.frame
 	);
 		//msgPopUpFrame.putmsg(caseDesc);
 		msgPopUpFrame.open();
+		msgPopUpHeaderFrame.open();
+		msgPopUpFooterFrame.open();
 		msgPopUpFrame.draw();
+		msgPopUpHeaderFrame.draw();
+		msgPopUpFooterFrame.draw();
 		mbcode = bbs.cursub_code;
 		var readingMb = new MsgBase(mbcode);
-		msgBaseIndex = readingMb;
-		msgNumIndex = msgNum;
 		readingMb.open();
-		var body = msgBaseIndex.get_msg_body(msgNumIndex);
+		headerFrame.clear();
+		var header2 = readingMb.get_msg_header(msgNumIndex);
+		headerFrame.center("Browsing Msg " + header2.number + " of " + readingMb.total_msgs + " in " + msg_area.grp_list[bbs.curgrp].sub_list[bbs.cursub].name);
+		var body = readingMb.get_msg_body(msgNumIndex);
+		msgPopUpFooterFrame.putmsg(JSON.stringify(header2));
+		msgPopUpFooterFrame.cycle();
+		msgPopUpHeaderFrame.putmsg("From:" + header2.from + "\r\nTo: " + header2.to + "\r\nDate:" + system.timestr(header2.when_written_time) + "\r\nSubject:" +header2.subject);
 		readingMb.close();
 		////chatOutputFrame.putmsg("length of message body : " + body.length);
 		footerBFrame.clear();
 		msgPopUpFrame.putmsg(body);
 		footerBFrame.putmsg("\1y(N)\1wext Page \1y(P)\1wPrevious Page \1y(X)\1wExit");
-		msgPopUpFrameFrame.scrollTo(1,1);
+		//msgPopUpFrame.scrollTo(1,1);
+		msgPopUpFrame.cycle();
+		msgPopUpHeaderFrame.cycle();
 		cycleAll();
+}
+	messagePopUp();
 		//all the initialization and loading of the message should becomplete.  now to get input
 		var a_key = console.inkey();
 		while(a_key != "x" ||a_key != "X"){
+			if(a_key == "x"  || a_key == "X") {
+				break;
+			}
+			if(a_key == "J" || a_key == "j"){
+				jumpForum();
+			}
 		if(a_key == "N"  || a_key == "n") {
 					msgPopUpFrame.scroll(0,msgPopUpFrame.height - 1);
 					cycleAll();
@@ -326,12 +374,43 @@ function displayMessage() {
 					msgPopUpFrame.scroll(0,-(msgPopUpFrame.height - 1));
 					cycleAll();
 					}
-		//let's try to handlers for changing groups, messages
+				if(a_key == KEY_UP||a_key == KEY_DOWN){
+					bbs.exec_xtrn("DDML");
+					refreshScreen();
+					messagePopUp();
+				}
+		// handlers for changing groups, messages
 		if(a_key == "-" || a_key == "+" || a_key == "<" || a_key == ">" || a_key == "[" || a_key == ""){
+			if(a_key == "+") { 
+				msgNumIndex++;
+				//mif(msgNumIndex > )
+				//go to next message unless last message
+			}
+			if(a_key == "-") { 
+				//go to prev message unless first message
+			} 
+			if(a_key == ">") { 
+				//go to next sub-board unless it is the last sub board
+			}
+			if(a_key == "<") { 
+				//go to prev sub unless it is first
+			}
+			if(a_key == "]") { 
+				//go to next group unless last group
+			}
+			if(a_key == "[") { 
+				//go to previous group
+			}
 
-	}  // end while for get in put
+	}  
+	a_key = console.inkey();
 }
+	invalidateFrames();
+	refreshScreen();
+	//tempRightBlockFrame.cycle();
+	msgList.display();
 }
+
 
 function messageViewer(){  //let's make this function convert the message listing to trees and use anohter frame (pop up to display messages)
 	
