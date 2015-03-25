@@ -3,9 +3,9 @@ load("sbbsdefs.js");
 load("tree.js");
 load("coldfuncs.js");
 load("str_cmds.js");
-
-var menuTree=new Tree(menuFrame,"My Menu");
-menuTree.colors = {
+var menuFrame = new Frame(1,3,leftColumnWidth,console.screen_rows -3,menuBG|menuFG);
+	var menuTree = new Tree(menuFrame,"My Menu");
+	menuTree.colors = {
 		fg:BLACK,
 		// non-current item/empty space background 
 		bg:BG_LIGHTGRAY,
@@ -30,16 +30,15 @@ menuTree.colors = {
 		// tree expansion foreground
 		xfg:LIGHTCYAN
 	}
-	menuTree.addItem("kill",kill);
 	menuTree.addItem("instant message",telegram);
 	menuTree.addItem("e-|mail and messages", netMailSection);
 	//menuTree.addItem("|post msg in this forum",forumPost);
-
+	//menuTree.addItem("kill",kill);
 	//menuTree.addItem("|trade wars 2002",tradeWars);
 	//var testSubTree = new Tree();
 	//menuTree.addTree(testSubTree);
 
-
+	menuTree.addItem("ANSI MUSEUM", sixteenColors);
 	//testTree = menuTree.addTree("|piss shit fuck");
 
 	var forumTree = menuTree.addTree("|forums");
@@ -57,7 +56,9 @@ menuTree.colors = {
 	var  gameTree = menuTree.addTree("games");
 	var dosDoorgameTree = gameTree.addTree("|old school classics")
 		dosDoorgameTree.addItem("|trade wars 2002",tradeWars);
+		dosDoorgameTree.addItem("The Pit",thePit)
 		dosDoorgameTree.addItem("|legend of the red dragon",lordBLink);
+		dosDoorgameTree.addItem("Coa L.O.R.D.",lordCoa)
 		dosDoorgameTree.addItem("usurper",coaUsurper);
 		dosDoorgameTree.addItem("barren realms",coaBRE);
 		dosDoorgameTree.addItem("falcon's eye",coaFalcon);
@@ -71,6 +72,7 @@ menuTree.colors = {
 		dosDoorgameTree.addItem("|bbs crash",bbsCrash);
 
 	var jsDoorgameTree = gameTree.addTree("|new school games");
+		jsDoorgameTree.addItem("Lemons",lemons)
 		jsDoorgameTree.addItem("Doubles aka |2048",doublesGame)
 		jsDoorgameTree.addItem("|star stocks",starStocks);
 		jsDoorgameTree.addItem("|dice wars",diceWars);
@@ -83,13 +85,13 @@ menuTree.colors = {
 		jsDoorgameTree.addItem("|word em",wordEm);
 		jsDoorgameTree.addItem("thirsty|ville",thirstyVille);
 		jsDoorgameTree.addItem("ma|ze race",mazeRace);
-		jsDoorgameTree.addItem("|oregon trail(in Games Section", xtrnMenuSec);
+		jsDoorgameTree.addItem("|oregon trail(in Games Section", oregonTrail);
 
 		gameTree.addItem("|more external programs(unorganized)",xtrnMenuSec)
 
 	var portalTree =  menuTree.addTree("|portals");
 		var bbsTree = portalTree.addTree("|bbs's");
-			bbsTree.addItem("p|hunc \1wsister bbs", phunc);
+			bbsTree.addItem("p|hunc sister bbs", phunc);
 			bbsTree.addItem("|fatcats", fatcats);
 			bbsTree.addItem("b|roken bubble", brokenBubble);
 			bbsTree.addItem("electronic |chicken", eChicken);
@@ -121,10 +123,45 @@ bbsFunctionTree.addItem("s|ysop menu", sysopMenu);
 }
 menuTree.addItem("logoff",logoffTheBBS);
 
-//menuTree.open();
+function createTempMenuFrame(){
+	
+	menuFrame.open();
+	menuFrame.draw();
 
 
+menuTree.open();
+menuFrame.cycle();
+var k = "";
+	while(k != "\t" && ascii(k) != 27){	
+		k = console.inkey();
+		if(k == "\t" || ascii(k) == 27){
+			menuTree.close();
+			menuFrame.delete();
+			menuFrame.invalidate();
+			//updateContext(contextNum);
+			//refreshScreen();
+			return;
+		}
+		menuTree.getcmd(k);
+		menuTree.cycle();
+		timerCheck();
 
+}
+this.killMenu = function(){
+	menuTree.close();
+			menuFrame.delete();
+			menuFrame.invalidate();
+
+}
+menuTree.close();
+menuFrame.close();
+menuFrame.delete();
+menuFrame.invalidate();
+updateContext(contextNum);
+			//refreshScreen();
+			return;
+
+}
 
 function kill(){
 	the_loop = false;
@@ -228,10 +265,14 @@ function commandConfirm(){
 	popUpFrame.putmsg(caseDesc);
 	popUpFrame.open();
 	popUpFrame.draw();
+	menuTree.close();
+	menuFrame.delete();
+	menuFrame.invalidate();
 	cursorPosX = parseInt(console.screen_rows/4) * 3 + 5;
 	cursorPosY = parseInt(console.screen_rows/6) * 4;
 	console.gotoxy(cursorPosX,cursorPosY);
 	console.pause();
+
 	invalidateFrames();
 	bbs.exec_xtrn("SCREENSV");
 }
@@ -241,11 +282,39 @@ function MenuItem(){
 
 }
 // *******  BUNCH OF FUNCTIONS PASTED FROM CHSH-MENU-FUNC.js
+
+function lemons(){
+caseDesc = "LEMONS IS JUST LIKE THE CLASSIC LEMMINGS, BUT WITH LEMONS";
+			commandConfirm();
+			bbs.exec_xtrn("LEMONS");
+			refreshAndReturn();
+			return;
+}
+
+function lordCoa(){
+caseDesc = "Another LORD Game networked With COA";
+			commandConfirm();
+			bbs.exec_xtrn("COALORD");
+			refreshAndReturn();
+			return;
+}
+function thePit(){
+caseDesc = "The Pit Interbbs COA Awesomeness";
+			commandConfirm();
+			bbs.exec_xtrn("COAPIT4");
+			refreshAndReturn();
+			return;
+}
 function logoffTheBBS(){
 console.clear();
 console.printfile("../text/logoff.msg");
 console.pause();
 bbs.hangup();
+}
+function refreshAndReturn(){
+		updateContext(contextNum);
+			refreshScreen();
+			menuFrame.cycle();
 }
 
 function sysopMenu() {
@@ -255,16 +324,23 @@ function sysopMenu() {
     str=get_next_str("",40,0,false);
                         str_cmds(str);
 console.pause();
-                        refreshScreen();
+                        refreshAndReturn();
 
                         return;
                         }
 
+function sixteenColors(){
+caseDesc = "View the  entire 16 colors ANSI archive remotely on a real BBS.  Written by your Sysop";
+			commandConfirm();
+			bbs.exec_xtrn("16COLORS");
+			refreshAndReturn();
+			return;
+}
 function coaUsurper(){
 caseDesc = "Usurper";
 			commandConfirm();
 			bbs.exec_xtrn("SURPER");
-			refreshScreen();
+			refreshAndReturn();
 			return;
 }
 
@@ -272,7 +348,7 @@ function coaBRE(){
 caseDesc = "Barren Realms Elite";
 			commandConfirm();
 			bbs.exec_xtrn("COABRE");
-			refreshScreen();
+			refreshAndReturn();
 			return;
 }
 
@@ -280,22 +356,22 @@ function coaFalcon(){
 		caseDesc = "Falcon's Eye";
 			commandConfirm();
 			bbs.exec_xtrn("COAFE");
-			refreshScreen();
+			refreshAndReturn();
 			return;
 }
 function globalWar(){
 		caseDesc = "Global War";
 			commandConfirm();
 			bbs.exec_xtrn("COAGWAR");
-			refreshScreen();
+			refreshAndReturn();
 			return;
 }
 
 function topRankBoxing(){
 	caseDesc = "Top Rank Boxing";
 			commandConfirm();
-			bbs.exec_xtrn("COA");
-			refreshScreen();
+			bbs.exec_xtrn("COATRBOX");
+			refreshAndReturn();
 			return;
 }
 
@@ -308,7 +384,7 @@ function bbsScene() {
 
 			bbs.exec_xtrn("BBSSCENE");
 		
-			refreshScreen();
+			refreshAndReturn();
 			return;
 			}
 			function freeNode() {
@@ -317,7 +393,7 @@ function bbsScene() {
 
 			bbs.exec_xtrn("FREENODE");
 		
-			refreshScreen();
+			refreshAndReturn();
 			return;
 			}
 function efNet() {
@@ -326,7 +402,7 @@ function efNet() {
 
 			bbs.exec_xtrn("EFNET");
 		
-			refreshScreen();
+			refreshAndReturn();
 			return;
 			}
 function germanIRC() {
@@ -335,7 +411,7 @@ function germanIRC() {
 
 			bbs.exec_xtrn("GERMANIR");
 		
-			refreshScreen();
+			refreshAndReturn();
 			return;
 			}
 function quakeNet() {
@@ -344,7 +420,7 @@ function quakeNet() {
 
 			bbs.exec_xtrn("QUAKENET");
 		
-			refreshScreen();
+			refreshAndReturn();
 			return;
 			}
 function rizon() {
@@ -353,7 +429,7 @@ function rizon() {
 
 			bbs.exec_xtrn("RIZON");
 		
-			refreshScreen();
+			refreshAndReturn();
 			return;
 			}
 function undernet() {
@@ -362,7 +438,7 @@ function undernet() {
 
 			bbs.exec_xtrn("UNDERNET");
 		
-			refreshScreen();
+			refreshAndReturn();
 			return;
 			}
 function uStream() {
@@ -371,7 +447,7 @@ function uStream() {
 
 			bbs.exec_xtrn("USTREAM");
 		
-			refreshScreen();
+			refreshAndReturn();
 			return;
 			}
 function netMailSection() {
@@ -379,7 +455,7 @@ function netMailSection() {
 			commandConfirm();
 			
 			email();
-			refreshScreen();
+			refreshAndReturn();
 			
 			return;
 			}
@@ -387,8 +463,10 @@ function netMailSection() {
 function jumpForum() {
 caseDesc = "Change message Areas";
 			//commandConfirm();
-			load("../xtrn/ddac_105/DDMsgAreaChooser.js")
-			refreshScreen();
+			load("../xtrn/ddac_105/DDMsgAreaChooser.js");
+			invalidateFrames();
+			msgList.display();
+			refreshAndReturn();
 			return;
 }
 
@@ -397,7 +475,7 @@ function browseNewMsgs() {
 			commandConfirm();
 			console.print("\r\nchBrowse/New Message Scan\r\n");
 			bbs.scan_subs(SCAN_NEW|SCAN_BACK);
-			refreshScreen();
+			refreshAndReturn();
 			return;
 			}
 			
@@ -406,7 +484,7 @@ function newMsgScan() {
 			commandConfirm();
 			console.print("\r\nchNew Message Scan\r\n");
 			bbs.scan_subs(SCAN_NEW);
-			refreshScreen();
+			refreshAndReturn();
 			return;
 }
 
@@ -415,7 +493,7 @@ function msgsForYou(){
 			commandConfirm();
 			console.print("\r\nchScan for Messages Posted to You\r\n");
 			bbs.scan_subs(SCAN_TOYOU);
-			refreshScreen();
+			refreshAndReturn();
 			return;
 			}
 function ecReader() {
@@ -425,7 +503,7 @@ function ecReader() {
 			bbs.exec_xtrn("ECREADER")
 			// console.print("\r\nchContinuous New Message Scan\r\n");
 			// bbs.scan_subs(SCAN_NEW|SCAN_CONST);
-			refreshScreen();
+			refreshAndReturn();
 			return;
 			}
 function digdistML(){
@@ -435,14 +513,14 @@ caseDesc = "Digital distortions message viewer (more stable not threaded)";
 			bbs.exec_xtrn("DDML")
 			// console.print("\r\nchContinuous New Message Scan\r\n");
 			// bbs.scan_subs(SCAN_NEW|SCAN_CONST);
-			refreshScreen();
+			refreshAndReturn();
 			return;
 			}
 function traditionalForum() {
 	caseDesc = "\1yR\1cead Forums";
 			commandConfirm();
 			bbs.scan_posts();
-			refreshScreen();
+			refreshAndReturn();
 			return;
 			}
 			
@@ -451,28 +529,28 @@ function traditionalForum() {
 			caseDesc = "\1yA\1cuto BBS Message";
 			commandConfirm();
 			bbs.auto_msg();
-			refreshScreen();
+			refreshAndReturn();
 			return;
 }
 	function fatcats() {
 			caseDesc = "Fat cats BBS uses an innovative interface and is part of the COA network";
 			commandConfirm();
 			bbs.exec_xtrn("FATCATS");
-			refreshScreen();
+			refreshAndReturn();
 			return;
 }
 	function brokenBubble() {
 			caseDesc = "The broken bubble is also part of COA, and has some innovative features, cool demos and a message base that discusses some of the things this BBS collective has been doing";
 			commandConfirm();
 			bbs.exec_xtrn("BROKEBUB");
-			refreshScreen();
+			refreshAndReturn();
 			return;
 }
 	function eChicken() {
 			caseDesc = "Electronic chicken has made many things for the BBS scene, and you can check out his BBS here.  A good example of a well done BBS.";
 			commandConfirm();
 			bbs.exec_xtrn("ECHICKEN");
-			refreshScreen();
+			refreshAndReturn();
 			return;
 }
 
@@ -480,7 +558,7 @@ function traditionalForum() {
 			caseDesc = "Pharcyde maintains an active message network, AgoraNet, echoed here, as well as some gaming leagues.";
 			commandConfirm();
 			bbs.exec_xtrn("PHARCYDE");
-			refreshScreen();
+			refreshAndReturn();
 			return;
 }
 
@@ -488,35 +566,35 @@ function traditionalForum() {
 			caseDesc = "Nightfox runs Digital Distortion, which has some customized features, which seem to be shared with the community.";
 			commandConfirm();
 			bbs.exec_xtrn("DIGDIST");
-			refreshScreen();
+			refreshAndReturn();
 			return;
 }
 	function phunc() {
 			caseDesc = "Our buddy Knight's new BBS launched 4/2014 watch it grow";
 			commandConfirm();
 			bbs.exec_xtrn("PHUNCBBS");
-			refreshScreen();
+			refreshAndReturn();
 			return;
 }
 	function tradeWars() {
 			caseDesc = "One of the sysops personal favorites, the classic Space Trading Games";
 			commandConfirm();
 			bbs.exec_xtrn("TWBBSLK");
-			refreshScreen();
+			refreshAndReturn();
 	    return
 }
         function lunatix() {
                         caseDesc = "haven't got to play it, i hear it's cool";
                         commandConfirm();
                         bbs.exec_xtrn("LUNATIX");
-	    refreshScreen();
+	    refreshAndReturn();
             return
 }
         function bbsCrash() {
                         caseDesc = "haven't got to play it, i hear it's cool";
                         commandConfirm();
                         bbs.exec_xtrn("BBSCRASH");
-            refreshScreen();
+            refreshAndReturn();
             return
 }
 	function randomArt() {
@@ -526,17 +604,17 @@ function traditionalForum() {
 			console.putmsg("\r\n\ *** !!! ***r\n\1h\1yEND \1cOF \1gARtWoRK \1rEND \1wOF \1mARtWoRK \1bEND  \1n\1yOF \1gARtWoRK\r\n\r\n\1h\1y                 come back and visit the gallery \1gANY \1mTIME\1r!!!!\r\n\r\n");
 			console.pause();
 			
-			refreshScreen();
+			refreshAndReturn();
 			return;
 			}
 	function oregonTrail() {
 			caseDesc = "Larry Lagomorph wrote this game, to play, please select option [2]Games, and then [2]oregontrail. Trying to find a better way to launch this";
 			commandConfirm();
 			//js.global.frame.close();
-			fixFrame2();
+			//fixFrame2();
 			console.clear();
 			bbs.exec_xtrn("OREGONTR");
-			refreshScreen();
+			refreshAndReturn();
 			return;
 }
 
@@ -544,7 +622,7 @@ function traditionalForum() {
 			caseDesc = "Everyone loves LORD, so many spin-offs, the original starts here";
 			commandConfirm();
 			bbs.exec_xtrn("LORD");
-			refreshScreen();
+			refreshAndReturn();
 			return;
 }
 
@@ -552,7 +630,7 @@ function planetTeos(){
 caseDesc = "Explore Space and destroy time";
 			commandConfirm();
 			bbs.exec_xtrn("TEOSBLNK");
-			refreshScreen();
+			refreshAndReturn();
 			return;
 }
 
@@ -560,7 +638,7 @@ function doublesGame(){
 caseDesc = "You are a DOG \r\n Give bitches bones and \r\n make puppies and shit and piss\rn\ in da house!!!";
 			commandConfirm();
 			bbs.exec_xtrn("DOUBLES");
-			refreshScreen();
+			refreshAndReturn();
 			return;
 }
 
@@ -570,14 +648,14 @@ caseDesc = "You are a DOG \r\n Give bitches bones and \r\n make puppies and shit
 			caseDesc = "This is a very addictive game if you ask Larry Lagomorph!";
 			commandConfirm();
 			bbs.exec_xtrn("STARSTOX");
-			refreshScreen();
+			refreshAndReturn();
 			return;
 }
 	function diceWars() {
 			caseDesc = "A very fun game where you roll dice for world domination!";
 			commandConfirm();
 			bbs.exec_xtrn("DICEWAR2");
-			refreshScreen();
+			refreshAndReturn();
 			return;
 }
 
@@ -585,14 +663,14 @@ caseDesc = "You are a DOG \r\n Give bitches bones and \r\n make puppies and shit
 			caseDesc = "An awesome demonstration of pushing the limit of text based sprite gaming";
 			commandConfirm();
 			bbs.exec_xtrn("STARTREK");
-			refreshScreen();
+			refreshAndReturn();
 			return;
 }
 	function uberBloxDoor() {
 			caseDesc = "An addictive puzzle game like no other!";
 			commandConfirm();
 			bbs.exec_xtrn("UBERBLOX");
-			refreshScreen();
+			refreshAndReturn();
 			return;
 }
 
@@ -600,7 +678,7 @@ caseDesc = "You are a DOG \r\n Give bitches bones and \r\n make puppies and shit
 			caseDesc = "DELIVER THE CHICKEN TO SAFETY, QUICK!";
 			commandConfirm();
 			bbs.exec_xtrn("CHICKEND");
-			refreshScreen();
+			refreshAndReturn();
 			return;
 }
 
@@ -608,7 +686,7 @@ caseDesc = "You are a DOG \r\n Give bitches bones and \r\n make puppies and shit
 			caseDesc = "This game is a pretty sweet\r\n fishing simulator, very challenging!";
 			commandConfirm();
 			bbs.exec_xtrn("FATFISH");
-			refreshScreen();
+			refreshAndReturn();
 			return;
 }
 
@@ -616,35 +694,35 @@ caseDesc = "You are a DOG \r\n Give bitches bones and \r\n make puppies and shit
 			caseDesc = "The classic door game, registered and with multi-BBS support without sacrificing core gameplay!";
 			commandConfirm();
 			bbs.exec_xtrn("LORDBLNK");
-			refreshScreen();
+			refreshAndReturn();
 			return;
 }
 	function lord2BLink() {
 			caseDesc = "The graphical sequel to LORD, very different and cool";
 			commandConfirm();
 			bbs.exec_xtrn("LRD2BLNK");
-			refreshScreen();
+			refreshAndReturn();
 			return;
 }
 	function teosBLink() {
 			caseDesc = "A cross between TradeWars and LORD";
 			commandConfirm();
 			bbs.exec_xtrn("TEOSBLNK");
-			refreshScreen();
+			refreshAndReturn();
 			return;
 }
 	function overkillBLink() {
 			caseDesc = "Operation Overkill";
 			commandConfirm();
 			bbs.exec_xtrn("OOK2BLNK");
-			refreshScreen();
+			refreshAndReturn();
 			return;
 }
 	function pimpBLink() {
 			caseDesc = "Play a Pimp, linked across other boards for more activity.";
 			commandConfirm();
 			bbs.exec_xtrn("PIMPBLNK");
-			refreshScreen();
+			refreshAndReturn();
 			return;
 }
 
@@ -653,7 +731,7 @@ caseDesc = "You are a DOG \r\n Give bitches bones and \r\n make puppies and shit
 			caseDesc = "INTER BBS BOGGLE CHALLENGE";
 			commandConfirm();
 			bbs.exec_xtrn("BOGGLE");
-			refreshScreen();
+			refreshAndReturn();
 			return;
 }
 
@@ -662,7 +740,7 @@ caseDesc = "You are a DOG \r\n Give bitches bones and \r\n make puppies and shit
 			caseDesc = "multi-player network \r\n improved tetris";
 			commandConfirm();
 			bbs.exec_xtrn("TETRIS");
-			refreshScreen();
+			refreshAndReturn();
 			return;
 }
 
@@ -671,7 +749,7 @@ caseDesc = "You are a DOG \r\n Give bitches bones and \r\n make puppies and shit
 			caseDesc = "SCRABBLE WITH OTHER BBS PLAYERS";
 			commandConfirm();
 			bbs.exec_xtrn("WORDEM");
-			refreshScreen();
+			refreshAndReturn();
 			return;
 }
 
@@ -680,7 +758,7 @@ caseDesc = "You are a DOG \r\n Give bitches bones and \r\n make puppies and shit
 			caseDesc = "Maze Race";
 			commandConfirm();
 			bbs.exec_xtrn("MAZERACE");
-			refreshScreen();
+			refreshAndReturn();
 			return;
 }
 	function thirstyVille() {
@@ -688,7 +766,7 @@ caseDesc = "You are a DOG \r\n Give bitches bones and \r\n make puppies and shit
 			caseDesc = "QUENCH THE THIRSTY OF \r\n virtual creatures \r\n with your love juices \r\n and entrepeneurship";
 			commandConfirm();
 			bbs.exec_xtrn("THIRSTY");
-			refreshScreen();
+			refreshAndReturn();
 			return;
 }
 	function unixEnv() {
@@ -696,28 +774,28 @@ caseDesc = "You are a DOG \r\n Give bitches bones and \r\n make puppies and shit
 			caseDesc = "This is a portal to a unix Environment, you will have to be approved for an account by a third party (nyx.nyx.net before using this feature";
 			commandConfirm();
 			bbs.exec_xtrn("NYXNYX");
-			refreshScreen();
+			refreshAndReturn();
 			return;
 }
 function internetRelayChat() {
 	caseDesc = "\1yC\1chat Section";
 			commandConfirm();
 			load("chat_sec.js");
-			refreshScreen();
+			refreshAndReturn();
 			return;
 			}
 function ansiWall() {
 caseDesc = "INTER BBS ANSI GRAPHICS WALL";
 			commandConfirm();
 			bbs.exec_xtrn("SYNCWALL");
-			refreshScreen();
+			refreshAndReturn();
 			return;
 }
 function synchroMM() {
 caseDesc = "FIND THE LOVE OF YOUR LIFE... if it's a fat loser dude hehe";
 			commandConfirm();
 			bbs.exec_xtrn("SMM");
-			refreshScreen();
+			refreshAndReturn();
 			return;
 }
 
@@ -729,15 +807,15 @@ caseDesc = "\1yU\1cserlist Display";
 			switch(get_next_keys("LSA",false)) {
 				case 'L':
 					bbs.list_logons();
-					refreshScreen();
+					refreshAndReturn();
 					return;
 				case 'S':
 					bbs.list_users(UL_SUB);
-					refreshScreen();
+					refreshAndReturn();
 					return;
 				case 'A':
 					bbs.list_users(UL_ALL);
-					refreshScreen();
+					refreshAndReturn();
 					return;
 			}
 		}
@@ -746,7 +824,7 @@ function defaultUser() {
 	caseDesc = "\1yD\1cefault User Settings";
 			commandConfirm();
 			bbs.user_config();
-			refreshScreen();
+			refreshAndReturn();
 			return;
 		}
 		
@@ -754,7 +832,7 @@ function bbsInfoStat() {
 	caseDesc = "\1yI\1cnfo for this BBS";
 			commandConfirm();
 			main_info();
-			refreshScreen();
+			refreshAndReturn();
 			return;
 }
 		
@@ -763,14 +841,14 @@ function findTextInForum() {
 			commandConfirm();
 			console.print("\r\nchFind Text in Messages\r\n");
 			bbs.scan_subs(SCAN_FIND);
-			refreshScreen();
+			refreshAndReturn();
 			return;		
 		}
 function xtrnMenuSec(){
 caseDesc = "\1ce\1yX\1ctra SPECIAL FUN";
 			commandConfirm();
 			bbs.xtrn_sec();
-			refreshScreen();
+			refreshAndReturn();
 			return;
 		}
 		
@@ -778,14 +856,14 @@ caseDesc = "\1ce\1yX\1ctra SPECIAL FUN";
 			caseDesc = "\1yL\1cist Node Activity";
 			commandConfirm();
 			bbs.list_nodes();
-			refreshScreen();
+			refreshAndReturn();
 			return;
 			}
 function forumPost() {
 caseDesc = "\1yP\1cost a Message";
 			commandConfirm();
 			bbs.post_msg();
-			//refreshScreen();
+			//refreshAndReturn();
 			return;
 			}
 
@@ -793,7 +871,7 @@ function shellHelp() {
 caseDesc = "user help";
 			commandConfirm();
 			userHelp();
-			refreshScreen();
+			refreshAndReturn();
 			return;
 		}
 
@@ -884,14 +962,14 @@ function dogWorld(){
 caseDesc = "You are a DOG \r\n Give bitches bones and \r\n make puppies and shit and piss\rn\ in da house!!!";
 			commandConfirm();
 			bbs.exec_xtrn("DOGWORLD");
-			refreshScreen();
+			refreshAndReturn();
 			return;
 }
 function dragonsHoard(){
 caseDesc = "That dragon got too much shit \r\n take it back motherfucker!!";
 			commandConfirm();
 			bbs.exec_xtrn("DHOARD");
-			refreshScreen();
+			refreshAndReturn();
 			return;
 }
 
@@ -899,6 +977,6 @@ function doorMud(){
 caseDesc = "This is not dirt mixed with water.. \r\n MUD=Multi-User Dungeon";
 			commandConfirm();
 			bbs.exec_xtrn("MECHWARS");
-			refreshScreen();
+			refreshAndReturn();
 			return;
 }
