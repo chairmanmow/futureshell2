@@ -33,7 +33,7 @@ function MsgList(){
 		currentBoard.open();
 		rightBlockFrame.clear();
 		//chatOutputFrame.putmsg("msglist.display running");
-		
+
 		rightBlockFrame.clear();
 		//rightBlockFrame.invalidate();
 		//rightBlockFrame.open();
@@ -94,12 +94,12 @@ function MsgList(){
 		}
 		//chatOutputFrame.putmsg("msglist.display got through if/else");
 		tableB2Frame.clear();
-		tableB2Frame.putmsg("       " + cursub2.substring(0,rightBlockFrame.width)+"\r\nYou've made " + user.stats.total_posts + " posts\r\n");
+		tableB2Frame.putmsg(cursub2.substring(0,tableB2Frame.width));  //"\r\nYou've made " + user.stats.total_posts + " posts\r\n"
 		tableB1Frame.clear();
 		tableB1Frame.center(groupDescription );//+ msgLastReadPointer
 		tableB1Frame.cycle();
 		tableB3Frame.clear();
-		tableB3Frame.center(curSubTotalMsgs + " Total Msgs in ");
+		tableB3Frame.center(curSubTotalMsgs + " Total Msgs");
 		currentBoard.close();
 		cycleAll();
 	//refreshMsgTree();
@@ -180,7 +180,7 @@ function MsgList(){
 		var a_key = console.inkey();
 		msgTree.open();
 
-		while(a_key != '\t'  || a_key != KEY_RIGHT  || a_key != KEY_LEFT){
+		while(a_key != '\t'  && a_key != KEY_RIGHT  && a_key != KEY_LEFT) {
 			a_key = console.inkey();
 			if(a_key == "E"  || a_key == "e"){
 				displayMessage();
@@ -203,11 +203,18 @@ function MsgList(){
 			msgTree.cycle();
 			timerCheck();
 			//cycleAll();
+			if(ascii(a_key) == 27){  // handle escape to go to menu
+					updateContext(1);
+					tempRightBlockFrame.invalidate();
+					tempRightBlockFrame.cycle();
+				}
 			if(a_key == KEY_LEFT || a_key == KEY_RIGHT){
 				if(a_key == KEY_LEFT){
 					msgSwitch = "prevSub";
+					msgTree.close();
 				} else {
 					msgSwitch = "nextSub";
+					msgTree.close();
 				}
 				cycleAll();
 				
@@ -225,13 +232,16 @@ function MsgList(){
 				tempRightBlockFrame.invalidate();
 				msgTree.close();
 				msgList.display();
-				contextSwitch(contextNum + 1);
+				contextNum = 0;
+				contextSwitch(contextNum);
+
 			return;
 		}
 		//timerCheck();  //commented because it appears to be un-need but could be needed later
 	}
 		this.display();
-		contextSwitch(contextNum + 1);
+		contextNum = 2; // this was changed 12/12
+		contextSwitch(contextNum);  // this doesn't make sense
 	}//end interact
 
 		function readMessage(msgNum) {
@@ -365,6 +375,7 @@ function displayMessage() {
 			}
 			if(a_key == "J" || a_key == "j"){
 				jumpForum();
+
 			}
 		if(a_key == "N"  || a_key == "n") {
 					msgPopUpFrame.scroll(0,msgPopUpFrame.height - 1);
