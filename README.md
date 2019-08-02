@@ -1,3 +1,5 @@
+this is pretty ugly/unorganized code someone ask ed me to post to see some things.  haven't run it in a bit, but it was the basis for the second shell that was deployed on Futureland.
+
 to run beta :
 
 Create supershell directory in sbbs/mods <br>
